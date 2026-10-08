@@ -18,6 +18,7 @@ Flat colour only, no gradients. Every file is pure vector paths: the lettering i
 | `veyr-mark.svg` (+ `-on-dark`, `-mono-black`, `-mono-white`) | Mark alone, where the name is already present or space is square |
 | `veyr-app-icon.svg` | App icon / favicon tile (also `public/favicon.svg`) |
 | `veyr-app-icon-mono.svg` | One-colour tile; the mark is a true knockout (transparent) |
+| `veyr-brand-sheet.png` | Overview of every variant and the favicon sizes |
 | `png/` | 16–1024 px app icons, `favicon.ico` (16/32/48), 512 px mark, 1200 px logos |
 | `source/` | Generator: `python3 brand/source/build_brand.py` (needs `fonttools brotli` and `npm install`) |
 
