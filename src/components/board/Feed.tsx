@@ -95,7 +95,11 @@ export function Feed({ highlightIndex }: { highlightIndex?: number }) {
             {board.posts.length === 0 ? 'No posts yet. Be the first to face the validators.' : `No ${filter} posts yet.`}
           </div>
         ) : (
-          visible.slice(0, limit).map((post) => <PostCard key={post.index} post={post} highlight={post.index === highlightIndex} />)
+          visible.slice(0, limit).map((post) => (
+            <div key={post.index} id={`post-${post.index}`} className="scroll-mt-28">
+              <PostCard post={post} highlight={post.index === highlightIndex} />
+            </div>
+          ))
         )}
       </div>
 
