@@ -1,0 +1,11 @@
+# genlayer-test configuration
+# Direct-mode tests:      npm run test:contract
+# Studionet integration:  npm run test:integration
+networks:
+  default: studionet
+  studionet:
+    accounts:
+      - "${GENLAYER_PRIVATE_KEY}"
+paths:
+  contracts: "contract"
+environment: .env
