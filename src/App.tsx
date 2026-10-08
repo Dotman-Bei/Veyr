@@ -19,7 +19,7 @@ export default function App() {
 
   return (
     <VeyrProvider config={configResult.config}>
-      <div id="top" className="min-h-screen bg-background text-foreground">
+      <div id="top" className="min-h-screen overflow-x-clip bg-background text-foreground">
         <a
           href="#board"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-background focus:px-4 focus:py-2"

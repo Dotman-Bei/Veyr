@@ -72,7 +72,7 @@ export function ConsensusOrbit({ className }: { className?: string }) {
   const stats = board.stats;
 
   return (
-    <div className={cn('relative mx-auto aspect-square w-full max-w-[500px]', className)}>
+    <div className={cn('relative mx-auto aspect-square w-full max-w-[500px] overflow-hidden', className)}>
       {RINGS.map((ring) => (
         <Ring key={ring.size} {...ring} />
       ))}
