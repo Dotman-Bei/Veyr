@@ -3,7 +3,7 @@ import { faqs } from '@/content';
 
 export function FAQ() {
   return (
-    <section id="faq" aria-labelledby="faq-title" className="mx-auto mt-32 max-w-4xl scroll-mt-24 px-6 lg:px-8 lg:py-32">
+    <section id="faq" aria-labelledby="faq-title" className="defer-render mx-auto mt-24 max-w-4xl scroll-mt-24 px-5 sm:mt-32 sm:px-6 lg:px-8 lg:py-32">
       <h2 id="faq-title" className="text-center text-3xl leading-10 tracking-tight sm:text-4xl">
         Frequently asked questions
       </h2>

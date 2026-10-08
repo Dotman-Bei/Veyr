@@ -12,7 +12,7 @@ const SIZE: Record<BentoSize, string> = {
 /** Warm, borderless bento tiles (frontend.md §6.4). Size classes live on the grid child only. */
 export function FeaturesGrid() {
   return (
-    <section id="features" aria-labelledby="features-title" className="mx-auto my-16 max-w-7xl scroll-mt-24 md:my-24 lg:my-40">
+    <section id="features" aria-labelledby="features-title" className="defer-render mx-auto my-16 max-w-7xl scroll-mt-24 md:my-24 lg:my-40">
       <SectionTitle
         id="features-title"
         eyebrow="Features"

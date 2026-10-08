@@ -109,7 +109,7 @@ function ReputationVisual() {
 
 export function HowItWorks() {
   return (
-    <section id="how" aria-labelledby="how-title" className="scroll-mt-24 py-24 sm:py-32">
+    <section id="how" aria-labelledby="how-title" className="defer-render scroll-mt-24 py-24 sm:py-32">
       <SectionTitle
         id="how-title"
         eyebrow="How it works"

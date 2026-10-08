@@ -169,6 +169,12 @@
   background: radial-gradient(circle at 30% 30%, hsl(var(--secondary-muted) / 0.55), hsl(var(--accent) / 0.15));
 }
 
+/* Skip layout/paint for offscreen sections until they approach the viewport. */
+@utility defer-render {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
 @utility no-scrollbar {
   scrollbar-width: none;
   &::-webkit-scrollbar {
