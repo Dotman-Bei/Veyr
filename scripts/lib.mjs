@@ -84,6 +84,23 @@ export function read(client, address, functionName, args = []) {
 }
 
 const DONE = new Set(['ACCEPTED', 'FINALIZED']);
+
+/**
+ * Return the contract error message if the accepted execution failed, else null.
+ * Bradbury-style RPCs set txExecutionResultName; Studionet only marks the
+ * leader receipt (execution_result "ERROR", result.payload = message).
+ */
+export function executionError(tx) {
+  if (tx?.txExecutionResultName === 'FINISHED_WITH_ERROR') return 'execution finished with error';
+  const receipts = tx?.consensus_data?.leader_receipt ?? [];
+  const receipt = receipts[receipts.length - 1];
+  if (!receipt) return null;
+  const status = receipt.result?.status;
+  if (receipt.execution_result === 'ERROR' || status === 'rollback' || status === 'error') {
+    return String(receipt.result?.payload ?? receipt.error ?? 'execution failed');
+  }
+  return null;
+}
 const FAILED = new Set(['UNDETERMINED', 'CANCELED', 'LEADER_TIMEOUT', 'VALIDATORS_TIMEOUT']);
 
 /**
@@ -107,8 +124,9 @@ export async function waitForConsensus(client, hash, { timeoutMs = 600_000, inte
       onStatus?.(status);
     }
     if (DONE.has(status)) {
-      if (tx.txExecutionResultName === 'FINISHED_WITH_ERROR') {
-        const err = new Error(`transaction ${status} but execution failed`);
+      const failure = executionError(tx);
+      if (failure) {
+        const err = new Error(`transaction ${status} but execution failed: ${failure}`);
         err.tx = tx;
         throw err;
       }
