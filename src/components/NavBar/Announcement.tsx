@@ -16,12 +16,12 @@ export function Announcement() {
           href={href}
           target="_blank"
           rel="noreferrer"
-          className="rounded-full bg-background/40 px-2.5 py-1 text-xs transition-colors hover:bg-background/60"
+          className="rounded-full bg-white/50 px-2.5 py-1 text-xs transition-colors hover:bg-white/70"
         >
           <span className="lg:hidden">Live on {network} · </span>View the contract <span aria-hidden>→</span>
         </a>
       ) : (
-        <span className="rounded-full bg-background/40 px-2.5 py-1 text-xs lg:hidden">Live on {network}</span>
+        <span className="rounded-full bg-white/50 px-2.5 py-1 text-xs lg:hidden">Live on {network}</span>
       )}
     </div>
   );
