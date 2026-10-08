@@ -45,7 +45,7 @@ export function Hero() {
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-14 px-6 lg:flex-row lg:gap-10 lg:px-8">
           <div className="max-w-3xl flex-1 text-center md:text-left">
             <h1 className="text-5xl font-extrabold leading-none text-foreground md:text-6xl">
-              Community moderation, <i>settled</i> by{' '}
+              Community moderation, <i className="pr-[0.08em]">settled</i> by{' '}
               <span className="font-black text-gradient-primary">validator consensus</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-base text-muted-foreground md:mx-0">
