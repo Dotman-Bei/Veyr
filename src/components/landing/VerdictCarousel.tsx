@@ -83,7 +83,7 @@ export function VerdictCarousel() {
       </div>
       <div
         ref={strip}
-        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-10 pt-4"
+        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-[calc(50%-140px)] pb-10 pt-4 sm:px-[calc(50%-160px)] md:px-[calc(50%-175px)]"
         onMouseLeave={() => setHovered(false)}
         onFocus={() => setHovered(true)}
         onBlur={(e) => {
