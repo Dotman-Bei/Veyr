@@ -249,3 +249,42 @@ class Veyr(gl.Contract):
             records.append(_as_public_record(index, self.posts[index]))
             index -= 1
         return records
+
+    # ------------------------------ writes ------------------------------
+
+    @gl.public.write
+    def submit_post(self, text: str) -> dict:
+        submission = text.strip()
+        if len(submission) == 0:
+            raise gl.vm.UserError("post text cannot be empty")
+        if len(submission) > MAX_POST_CHARS:
+            raise gl.vm.UserError(f"post text too long (max {MAX_POST_CHARS} chars)")
+
+        author = gl.message.sender_address
+        verdict = _moderate_with_consensus(self.topic, submission)
+        approved = verdict["decision"] == APPROVE
+
+        # Everything below runs only after consensus accepted the verdict.
+        self.posts.append(
+            Post(
+                author=author,
+                text=submission,
+                approved=approved,
+                category=verdict["category"],
+                reason=verdict["reason"],
+            )
+        )
+
+        score = int(self.reputation.get(author, i32(0)))
+        if approved:
+            self.reputation[author] = i32(score + 1)
+            self.approved_count = u256(int(self.approved_count) + 1)
+        else:
+            self.reputation[author] = i32(score - 1)
+
+        return {
+            "index": len(self.posts) - 1,
+            "approved": approved,
+            "category": verdict["category"],
+            "reason": verdict["reason"],
+        }
