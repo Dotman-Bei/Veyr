@@ -27,7 +27,7 @@ export function NavBar() {
         )}
       >
         <a href="#top" className="flex items-center rounded-md" aria-label="Veyr, back to top">
-          <Logotype className={cn('w-auto transition-all duration-300', scrolled ? 'h-7' : 'h-8')} title="Veyr" />
+          <Logotype className={cn('w-auto transition-all duration-300', scrolled ? 'h-[22px]' : 'h-6')} title="Veyr" />
         </a>
 
         <ul className="hidden items-center gap-x-8 lg:flex">
@@ -52,7 +52,7 @@ export function NavBar() {
             </SheetTrigger>
             <SheetContent>
               <SheetTitle className="flex items-center">
-                <Logotype className="h-6" />
+                <Logotype className="h-[22px]" />
               </SheetTitle>
               <SheetDescription className="sr-only">Site navigation and wallet</SheetDescription>
               <ul className="mt-4 divide-y divide-border">

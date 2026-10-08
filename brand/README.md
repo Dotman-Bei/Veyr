@@ -38,7 +38,7 @@ Don't put standard Ember on Ink: it measures only 2.8:1. Use Ember bright there.
 ## Clear space and size
 
 - **Clear space:** keep at least the width of the verdict block (¼ of the mark's width) free on every side.
-- **Minimum size:** logo 72 px / 18 mm wide; mark 16 px; app icon 16 px (it was designed to read at favicon size).
+- **Minimum size:** logo 64 px / 16 mm wide; mark 16 px; app icon 16 px (it was designed to read at favicon size).
 - Below 24 px, prefer the app icon to the bare mark.
 
 ## Don't
