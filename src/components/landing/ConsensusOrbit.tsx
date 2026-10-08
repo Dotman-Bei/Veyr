@@ -56,7 +56,7 @@ function Node({ ring, angle, duration }: (typeof NODES)[number]) {
                 className="flex size-9 items-center justify-center rounded-full border bg-background shadow-md sm:size-11"
                 style={{ transform: `rotate(${-angle}deg)` }}
               >
-                <Bot className="size-4 text-primary sm:size-5 dark:text-secondary" />
+                <Bot className="size-4 text-primary sm:size-5" />
               </div>
             </div>
           </div>

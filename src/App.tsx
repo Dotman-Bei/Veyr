@@ -8,13 +8,10 @@ import { Hero } from '@/components/landing/Hero';
 import { HowItWorks } from '@/components/landing/HowItWorks';
 import { VerdictCarousel } from '@/components/landing/VerdictCarousel';
 import { NavBar } from '@/components/NavBar/NavBar';
-import { useColorMode } from '@/hooks/useColorMode';
 import { configResult } from '@/lib/config';
 import { VeyrProvider } from '@/state/VeyrContext';
 
 export default function App() {
-  const { mode } = useColorMode();
-
   if (!configResult.ok) return <ConfigError errors={configResult.errors} />;
 
   return (
@@ -39,7 +36,7 @@ export default function App() {
           <Footer />
         </div>
       </div>
-      <Toaster position="bottom-right" theme={mode} richColors closeButton />
+      <Toaster position="bottom-right" theme="light" richColors closeButton />
     </VeyrProvider>
   );
 }

@@ -18,7 +18,7 @@ export function FAQ() {
                   href={faq.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-3 inline-block text-sm font-semibold text-primary hover:underline dark:text-secondary"
+                  className="mt-3 inline-block text-sm font-semibold text-primary hover:underline"
                 >
                   Learn more <span aria-hidden>→</span>
                 </a>

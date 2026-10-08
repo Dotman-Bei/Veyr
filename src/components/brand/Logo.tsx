@@ -14,7 +14,7 @@ export function Logo({ className }: { className?: string }) {
       />
       <circle cx="8" cy="9.5" r="2.2" className="fill-primary-foreground" />
       <circle cx="24" cy="9.5" r="2.2" className="fill-primary-foreground" />
-      <circle cx="16" cy="22.5" r="3" className="fill-secondary dark:fill-[hsl(14_80%_55%)]" />
+      <circle cx="16" cy="22.5" r="3" className="fill-secondary" />
     </svg>
   );
 }

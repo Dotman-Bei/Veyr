@@ -1,12 +1,8 @@
 @import 'tailwindcss';
 
-/* Dark mode is a class on <html>, set before first paint by index.html. */
-@custom-variant dark (&:where(.dark, .dark *));
-
 /*
  * Veyr tokens (shadcn-style HSL triplets, consumed as hsl(var(--x))).
- * Brand pair swaps roles per mode: ink violet + ember by day,
- * cream + lavender by night. Contrast fixes from frontend.md §9 applied:
+ * Light-only brand pair: ink violet + ember. Contrast fixes from frontend.md §9 applied:
  * navy-ish accent-foreground, 40% muted-foreground, darker destructive,
  * and a gradient that starts dark enough to read on white.
  */
@@ -41,35 +37,6 @@
   color-scheme: light;
 }
 
-.dark {
-  --background: 245 32% 6%;
-  --foreground: 0 0% 98%;
-  --card: 245 30% 8%;
-  --card-foreground: 0 0% 98%;
-  --card-accent: 36 45% 92%;
-  --card-subtle: 248 24% 14%;
-  --popover: 245 30% 8%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 36 45% 92%;
-  --primary-foreground: 245 32% 8%;
-  --secondary: 258 90% 76%;
-  --secondary-foreground: 245 32% 8%;
-  --secondary-muted: 258 80% 92%;
-  --muted: 248 24% 16%;
-  --muted-foreground: 240 6% 70%;
-  --accent: 36 45% 92%;
-  --accent-foreground: 248 55% 20%;
-  --destructive: 0 80% 70%;
-  --destructive-foreground: 245 32% 8%;
-  --success: 152 55% 60%;
-  --warning: 38 95% 62%;
-  --border: 248 16% 18%;
-  --input: 248 16% 26%;
-  --ring: 36 45% 80%;
-  --gradient-from: 36 60% 88%;
-  --gradient-to: 258 90% 76%;
-  color-scheme: dark;
-}
 
 @theme inline {
   --color-background: hsl(var(--background));
@@ -200,9 +167,6 @@
 
 @utility bg-radial-gradient {
   background: radial-gradient(circle at 30% 30%, hsl(var(--secondary-muted) / 0.55), hsl(var(--accent) / 0.15));
-  .dark & {
-    background: radial-gradient(circle at 30% 30%, hsl(var(--card-subtle) / 0.8), hsl(var(--card)));
-  }
 }
 
 @utility no-scrollbar {

@@ -13,7 +13,7 @@ export function PostCard({ post, highlight = false, className }: { post: Post; h
   return (
     <Card
       variant="static"
-      className={cn('p-5', highlight && 'ring-2 ring-primary/40 dark:ring-secondary/50', className)}
+      className={cn('p-5', highlight && 'ring-2 ring-primary/40', className)}
       aria-label={`Post #${post.index}, ${post.approved ? 'approved' : 'rejected'}`}
     >
       <div className="flex flex-wrap items-center gap-2">
@@ -21,7 +21,7 @@ export function PostCard({ post, highlight = false, className }: { post: Post; h
         <CategoryBadge category={post.category} />
         <span className="ml-auto flex items-center gap-2 font-mono text-xs text-muted-foreground">
           {authorHref ? (
-            <a href={authorHref} target="_blank" rel="noreferrer" className="hover:text-primary dark:hover:text-secondary" title={post.author}>
+            <a href={authorHref} target="_blank" rel="noreferrer" className="hover:text-primary" title={post.author}>
               {shortAddress(post.author)}
             </a>
           ) : (

@@ -7,7 +7,7 @@ function TopGradient() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute right-0 top-0 -z-10 w-full transform-gpu overflow-hidden blur-3xl dark:hidden sm:top-[-20rem]"
+      className="pointer-events-none absolute right-0 top-0 -z-10 w-full transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]"
     >
       <div
         className="relative left-[calc(50%+6rem)] aspect-[1155/678] w-[36rem] bg-linear-to-tr from-orange-400 to-violet-300 opacity-10 sm:w-[72rem]"
@@ -24,7 +24,7 @@ function BottomGradient() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute inset-x-0 top-[calc(100%-40rem)] -z-10 transform-gpu overflow-hidden blur-3xl dark:hidden sm:top-[calc(100%-65rem)]"
+      className="pointer-events-none absolute inset-x-0 top-[calc(100%-40rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-65rem)]"
     >
       <div
         className="relative aspect-[1155/678] w-[36rem] bg-linear-to-br from-orange-400 to-violet-300 opacity-10 sm:left-[calc(50%-30rem)] sm:w-[72rem]"

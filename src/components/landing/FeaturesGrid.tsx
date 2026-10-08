@@ -29,7 +29,7 @@ export function FeaturesGrid() {
           >
             <feature.icon
               className={cn(
-                'mb-4 text-primary dark:text-secondary',
+                'mb-4 text-primary',
                 feature.size === 'large' ? 'size-12' : 'size-7',
               )}
               aria-hidden

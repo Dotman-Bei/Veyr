@@ -30,7 +30,7 @@ export function ConsensusProgress({ hash, stage, chainStatus, startedAt }: Props
   return (
     <div className="rounded-xl border bg-card-subtle p-5" role="status" aria-live="polite">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <Loader2 className="size-4 animate-spin text-primary dark:text-secondary" aria-hidden />
+        <Loader2 className="size-4 animate-spin text-primary" aria-hidden />
         <span className="font-semibold">Validators are reaching consensus</span>
         <span className="ml-auto font-mono text-xs tabular-nums text-muted-foreground">{elapsed}s</span>
       </div>
@@ -45,11 +45,11 @@ export function ConsensusProgress({ hash, stage, chainStatus, startedAt }: Props
                 className={cn(
                   'flex size-5 shrink-0 items-center justify-center rounded-full border',
                   done && 'border-success bg-success text-background',
-                  current && 'border-primary dark:border-secondary',
+                  current && 'border-primary',
                 )}
                 aria-hidden
               >
-                {done ? <Check className="size-3" /> : current ? <span className="size-1.5 animate-pulse rounded-full bg-primary dark:bg-secondary" /> : null}
+                {done ? <Check className="size-3" /> : current ? <span className="size-1.5 animate-pulse rounded-full bg-primary" /> : null}
               </span>
               <span className={cn(current && 'font-semibold')}>{label}</span>
               <span className="sr-only">{done ? '(done)' : current ? '(in progress)' : ''}</span>
@@ -65,7 +65,7 @@ export function ConsensusProgress({ hash, stage, chainStatus, startedAt }: Props
         <div>
           Tx:{' '}
           {href ? (
-            <a href={href} target="_blank" rel="noreferrer" className="underline-offset-2 hover:text-primary hover:underline dark:hover:text-secondary">
+            <a href={href} target="_blank" rel="noreferrer" className="underline-offset-2 hover:text-primary hover:underline">
               {shortAddress(hash, 8)}
             </a>
           ) : (

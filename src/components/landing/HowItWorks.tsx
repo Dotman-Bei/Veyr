@@ -128,7 +128,7 @@ export function HowItWorks() {
               <p>
                 A validator accepts the proposal only if its own decision matches. The wording of the reason can differ;
                 the decision cannot. That is GenLayer's{' '}
-                <a href={EQUIVALENCE_DOCS} target="_blank" rel="noreferrer" className="font-semibold text-primary underline-offset-2 hover:underline dark:text-secondary">
+                <a href={EQUIVALENCE_DOCS} target="_blank" rel="noreferrer" className="font-semibold text-primary underline-offset-2 hover:underline">
                   Equivalence Principle
                 </a>{' '}
                 applied to moderation.
