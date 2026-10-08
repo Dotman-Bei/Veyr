@@ -15,15 +15,15 @@ export function NavBar() {
       className={cn(
         'sticky top-0 z-50 transition-all duration-300',
         scrolled
-          ? 'top-4 mx-4 rounded-full border bg-background/90 shadow-lg backdrop-blur-lg md:mx-20 lg:mx-10 xl:mx-30'
+          ? 'top-3 mx-3 rounded-full border bg-background/90 shadow-lg backdrop-blur-lg sm:top-4 sm:mx-4 md:mx-auto md:w-[calc(100%-4rem)] md:max-w-6xl'
           : 'mx-0 border-b bg-background/80 backdrop-blur-lg',
       )}
     >
       <nav
         aria-label="Main"
         className={cn(
-          'flex items-center justify-between gap-4 transition-all duration-300',
-          scrolled ? 'p-3 lg:px-6' : 'p-6 lg:px-8',
+          'mx-auto flex max-w-7xl items-center justify-between gap-4 transition-all duration-300',
+          scrolled ? 'py-2.5 pl-5 pr-3 lg:px-6' : 'px-5 py-4 sm:px-6 sm:py-5 lg:px-8',
         )}
       >
         <a href="#top" className="flex items-center rounded-md" aria-label="Veyr, back to top">
