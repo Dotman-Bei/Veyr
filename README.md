@@ -88,6 +88,8 @@ Connect your wallet. Veyr asks it to add or switch to Studionet, and signs `subm
 - treats `UNDETERMINED`, `CANCELED`, validator or leader timeouts, rolled-back executions and polling timeouts as errors that never produce a verdict;
 - shows the final verdict only after reading the new post back from contract state.
 
+For speed, the GenLayer SDK loads lazily, in parallel with first render, and the board renders each contract read as it arrives. On repeat visits the last board snapshot (kept in `localStorage`) paints immediately. It is labelled as such and always replaced by a fresh read from the contract, so it is a display cache only.
+
 ## Deploy
 
 ```bash
