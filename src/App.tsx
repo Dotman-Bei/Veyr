@@ -1,7 +1,12 @@
 import { Toaster } from 'sonner';
 import { BoardSection } from '@/components/board/BoardSection';
 import { ConfigError } from '@/components/ConfigError';
+import { FAQ } from '@/components/landing/FAQ';
+import { FeaturesGrid } from '@/components/landing/FeaturesGrid';
+import { Footer } from '@/components/landing/Footer';
 import { Hero } from '@/components/landing/Hero';
+import { HowItWorks } from '@/components/landing/HowItWorks';
+import { VerdictCarousel } from '@/components/landing/VerdictCarousel';
 import { NavBar } from '@/components/NavBar/NavBar';
 import { useColorMode } from '@/hooks/useColorMode';
 import { configResult } from '@/lib/config';
@@ -25,8 +30,13 @@ export default function App() {
         <div className="mx-auto max-w-(--breakpoint-2xl)">
           <main className="isolate">
             <Hero />
+            <VerdictCarousel />
             <BoardSection />
+            <HowItWorks />
+            <FeaturesGrid />
+            <FAQ />
           </main>
+          <Footer />
         </div>
       </div>
       <Toaster position="bottom-right" theme={mode} richColors closeButton />
