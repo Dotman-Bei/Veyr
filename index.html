@@ -3,7 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Veyr</title>
+    <title>Veyr: community moderation settled by GenLayer consensus</title>
+    <meta
+      name="description"
+      content="Veyr is a decentralized community forum. Every post is moderated by GenLayer validator LLM consensus inside an Intelligent Contract, and the verdict and author reputation live on-chain."
+    />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0a17" media="(prefers-color-scheme: dark)" />
+    <meta property="og:title" content="Veyr" />
+    <meta property="og:description" content="Community moderation settled by validator consensus on GenLayer." />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      // Pre-hydration colour mode: stored choice, else system preference. Avoids a light flash.
+      (function () {
+        try {
+          var stored = localStorage.getItem('veyr-theme');
+          var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.classList.toggle('dark', dark);
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

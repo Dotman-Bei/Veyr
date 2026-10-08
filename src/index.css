@@ -1,0 +1,196 @@
+@import 'tailwindcss';
+
+/* Dark mode is a class on <html>, set before first paint by index.html. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Veyr tokens (shadcn-style HSL triplets, consumed as hsl(var(--x))).
+ * Brand pair swaps roles per mode: ink violet + ember by day,
+ * cream + lavender by night. Contrast fixes from frontend.md §9 applied:
+ * navy-ish accent-foreground, 40% muted-foreground, darker destructive,
+ * and a gradient that starts dark enough to read on white.
+ */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 4%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 4%;
+  --card-accent: 0 0% 100%;
+  --card-subtle: 24 70% 96%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 4%;
+  --primary: 248 55% 20%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 14 80% 40%;
+  --secondary-foreground: 0 0% 98%;
+  --secondary-muted: 22 85% 82%;
+  --muted: 240 5% 96%;
+  --muted-foreground: 240 4% 38%;
+  --accent: 22 88% 66%;
+  --accent-foreground: 248 55% 20%;
+  --destructive: 0 72% 45%;
+  --destructive-foreground: 0 0% 98%;
+  --success: 152 62% 28%;
+  --warning: 32 95% 38%;
+  --border: 240 6% 90%;
+  --input: 240 6% 84%;
+  --ring: 248 55% 20%;
+  --radius: 0.5rem;
+  --gradient-from: 14 80% 42%;
+  --gradient-to: 266 62% 46%;
+  color-scheme: light;
+}
+
+.dark {
+  --background: 245 32% 6%;
+  --foreground: 0 0% 98%;
+  --card: 245 30% 8%;
+  --card-foreground: 0 0% 98%;
+  --card-accent: 36 45% 92%;
+  --card-subtle: 248 24% 14%;
+  --popover: 245 30% 8%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 36 45% 92%;
+  --primary-foreground: 245 32% 8%;
+  --secondary: 258 90% 76%;
+  --secondary-foreground: 245 32% 8%;
+  --secondary-muted: 258 80% 92%;
+  --muted: 248 24% 16%;
+  --muted-foreground: 240 6% 70%;
+  --accent: 36 45% 92%;
+  --accent-foreground: 248 55% 20%;
+  --destructive: 0 80% 70%;
+  --destructive-foreground: 245 32% 8%;
+  --success: 152 55% 60%;
+  --warning: 38 95% 62%;
+  --border: 248 16% 18%;
+  --input: 248 16% 26%;
+  --ring: 36 45% 80%;
+  --gradient-from: 36 60% 88%;
+  --gradient-to: 258 90% 76%;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-accent: hsl(var(--card-accent));
+  --color-card-subtle: hsl(var(--card-subtle));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary-muted: hsl(var(--secondary-muted));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-success: hsl(var(--success));
+  --color-warning: hsl(var(--warning));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --font-display: 'Outfit Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Outfit Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --breakpoint-2xsm: 375px;
+  --breakpoint-xsm: 425px;
+  --breakpoint-3xl: 2000px;
+
+  /* Soft raised/pressed surfaces ([showcase] shadow-outer / shadow-inner). */
+  --shadow-outer: inset 0 1px 0 0 hsl(var(--background) / 0.35), 0 1px 2px 0 hsl(var(--primary) / 0.25),
+    0 4px 12px -2px hsl(var(--primary) / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 hsl(var(--primary) / 0.12), inset 0 -1px 0 0 hsl(var(--background) / 0.6);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from { height: 0; }
+    to { height: var(--radix-accordion-content-height); }
+  }
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height); }
+    to { height: 0; }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-black leading-tight tracking-tight;
+  }
+  p {
+    @apply font-mono leading-relaxed;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@utility text-gradient-primary {
+  background: linear-gradient(to right, hsl(var(--gradient-from)), hsl(var(--gradient-to)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@utility text-gradient-primary-diagonal {
+  background: linear-gradient(135deg, hsl(var(--gradient-from)), hsl(var(--gradient-to)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@utility border-gradient-primary {
+  background: linear-gradient(to right, hsl(var(--gradient-from)), hsl(var(--gradient-to)));
+  padding: 1px;
+  & > * {
+    background: hsl(var(--background));
+  }
+}
+
+@utility bg-radial-gradient {
+  background: radial-gradient(circle at 30% 30%, hsl(var(--secondary-muted) / 0.55), hsl(var(--accent) / 0.15));
+  .dark & {
+    background: radial-gradient(circle at 30% 30%, hsl(var(--card-subtle) / 0.8), hsl(var(--card)));
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
