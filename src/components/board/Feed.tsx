@@ -55,7 +55,7 @@ export function Feed({ highlightIndex }: { highlightIndex?: number }) {
                 setFilter(f.id);
                 setLimit(PAGE);
               }}
-              className="h-7"
+              className="h-7 pointer-coarse:h-9"
             >
               {f.label}
             </Button>

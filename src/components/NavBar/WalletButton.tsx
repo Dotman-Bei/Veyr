@@ -40,7 +40,7 @@ export function WalletButton({ compact = false, className }: { compact?: boolean
           {shortAddress(wallet.account)}
         </span>
         <ReputationPill value={reputation.value} className="ml-1" />
-        <Button variant="ghost" size="icon" className="size-7 rounded-full" onClick={wallet.disconnect}>
+        <Button variant="ghost" size="icon" className="size-7 rounded-full pointer-coarse:size-9" onClick={wallet.disconnect}>
           <LogOut aria-hidden />
           <span className="sr-only">Disconnect wallet</span>
         </Button>
