@@ -11,7 +11,7 @@ function Stat({ label, value, icon: Icon, tone }: { label: string; value: string
       </span>
       <div className="min-w-0">
         <div className="font-display text-2xl font-black tabular-nums leading-none">{value}</div>
-        <div className="mt-1 truncate text-xs text-muted-foreground">{label}</div>
+        <div className="mt-1 text-xs leading-snug text-muted-foreground">{label}</div>
       </div>
     </div>
   );
@@ -30,7 +30,7 @@ export function StatsRow() {
       <Stat label="Approved" value={stats ? String(stats.approved) : dash} icon={CheckCircle2} tone="text-success" />
       <Stat label="Rejected" value={stats ? String(stats.total - stats.approved) : dash} icon={XCircle} tone="text-destructive" />
       <Stat
-        label={wallet.signerAddress ? 'Your reputation' : 'Connect to see reputation'}
+        label={wallet.signerAddress ? 'Your reputation' : 'Your reputation (connect)'}
         value={rep === null ? dash : `${rep > 0 ? '+' : ''}${rep}`}
         icon={UserRound}
         tone={rep && rep > 0 ? 'text-success' : rep && rep < 0 ? 'text-destructive' : undefined}

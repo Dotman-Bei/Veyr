@@ -16,7 +16,7 @@ export function SectionTitle({
   id?: string;
 }) {
   return (
-    <div className={cn('mx-auto max-w-2xl text-center', className)}>
+    <div className={cn('mx-auto max-w-2xl px-6 text-center', className)}>
       {eyebrow && <p className="text-sm font-semibold uppercase tracking-wider text-secondary">{eyebrow}</p>}
       <h2 id={id} className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
         {title}
