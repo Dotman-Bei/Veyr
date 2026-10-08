@@ -9,7 +9,7 @@ export function BoardSection() {
   const [highlight, setHighlight] = useState<number | undefined>();
 
   return (
-    <section id="board" aria-labelledby="board-title" className="mx-auto mt-24 max-w-7xl scroll-mt-24 px-6 lg:px-8">
+    <section id="board" aria-labelledby="board-title" className="mx-auto mt-16 max-w-7xl scroll-mt-24 px-4 sm:mt-24 sm:px-6 lg:px-8">
       <SectionTitle
         id="board-title"
         eyebrow="The board"
@@ -20,11 +20,12 @@ export function BoardSection() {
         }
         description="Everything below is read live from the Veyr Intelligent Contract on GenLayer. Submit a post and watch consensus settle its verdict."
       />
-      <div className="mt-12">
+      <div className="mt-10 sm:mt-12">
         <StatsRow />
       </div>
-      <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-        <div className="lg:sticky lg:top-28">
+      <div className="mt-6 grid items-start gap-8 sm:mt-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        {/* Sticky on desktop, but never taller than the viewport: it scrolls inside instead. */}
+        <div className="lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:overscroll-contain lg:rounded-xl">
           <Composer onSettled={(post: Post) => setHighlight(post.index)} />
         </div>
         <Feed highlightIndex={highlight} />
