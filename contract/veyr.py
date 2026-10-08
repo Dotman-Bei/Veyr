@@ -145,6 +145,42 @@ def _normalize_moderation(value: typing.Any) -> dict:
     return {"decision": decision, "category": category, "reason": reason}
 
 
+# ------------------------- consensus moderation -------------------------
+
+
+def _ask_moderator(prompt: str) -> dict:
+    """One LLM moderation pass. Retries once on malformed output, then fails."""
+    try:
+        return _normalize_moderation(gl.nondet.exec_prompt(prompt, response_format="json"))
+    except gl.vm.UserError:
+        return _normalize_moderation(gl.nondet.exec_prompt(prompt, response_format="json"))
+
+
+def _moderate_with_consensus(topic: str, submission: str) -> dict:
+    """
+    Leader proposes a verdict; every validator independently re-moderates the
+    post and agrees only if its APPROVE/REJECT decision matches the leader's.
+    Category and reason wording may differ: they come from the accepted leader.
+    """
+    prompt = _moderation_prompt(topic, submission)
+
+    def leader() -> dict:
+        return _ask_moderator(prompt)
+
+    def validator(leader_result: typing.Any) -> bool:
+        if not isinstance(leader_result, gl.vm.Return):
+            return False
+        try:
+            proposed = _normalize_moderation(leader_result.calldata)
+            own = _ask_moderator(prompt)
+        except Exception:
+            return False
+        return own["decision"] == proposed["decision"]
+
+    # Re-normalize the accepted result before it can touch state.
+    return _normalize_moderation(gl.vm.run_nondet_unsafe(leader, validator))
+
+
 # ------------------------------ public shape ------------------------------
 
 
