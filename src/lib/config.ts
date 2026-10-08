@@ -9,8 +9,15 @@ export const NETWORKS = { studionet, localnet } as const;
 export type NetworkName = keyof typeof NETWORKS;
 export type GenLayerChain = (typeof NETWORKS)[NetworkName];
 
+/** Studio explorer for each network (the chain's own default URL is not the Studio one). */
+const EXPLORERS: Record<NetworkName, string | null> = {
+  studionet: 'https://explorer-studio.genlayer.com',
+  localnet: null,
+};
+
 export interface AppConfig {
   network: NetworkName;
+  explorerUrl: string | null;
   chain: GenLayerChain;
   contractAddress: `0x${string}`;
   rpcUrl: string;
@@ -86,6 +93,7 @@ export function parseConfig(env: RawEnv): ConfigResult {
     ok: true,
     config: {
       network,
+      explorerUrl: EXPLORERS[network],
       chain,
       contractAddress: contractAddress as `0x${string}`,
       rpcUrl: chain.rpcUrls.default.http[0],
@@ -94,5 +102,11 @@ export function parseConfig(env: RawEnv): ConfigResult {
     },
   };
 }
+
+export const txUrl = (config: AppConfig, hash: string) =>
+  config.explorerUrl ? `${config.explorerUrl}/tx/${hash}` : null;
+
+export const addressUrl = (config: AppConfig, address: string) =>
+  config.explorerUrl ? `${config.explorerUrl}/address/${address}` : null;
 
 export const configResult: ConfigResult = parseConfig(import.meta.env as RawEnv);

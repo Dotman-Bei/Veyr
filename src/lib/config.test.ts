@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { studionet } from 'genlayer-js/chains';
-import { parseConfig } from './config';
+import { addressUrl, parseConfig, txUrl } from './config';
 
 const ADDRESS = '0xC1C38084e9bf9f0A3a7016fA0470b5E4c436bEE3';
 
@@ -14,6 +14,8 @@ describe('parseConfig', () => {
     expect(result.config.rpcUrl).toBe('https://studio.genlayer.com/api');
     expect(result.config.rpcOverridden).toBe(false);
     expect(result.config.devPrivateKey).toBeNull();
+    expect(addressUrl(result.config, ADDRESS)).toBe(`https://explorer-studio.genlayer.com/address/${ADDRESS}`);
+    expect(txUrl(result.config, '0xabc')).toBe('https://explorer-studio.genlayer.com/tx/0xabc');
   });
 
   it('reports a missing contract address', () => {
