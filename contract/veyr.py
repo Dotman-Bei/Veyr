@@ -140,7 +140,7 @@ def _normalize_moderation(value: typing.Any) -> dict:
         reason = (
             "Meets the board policy." if decision == APPROVE else "Violates the board policy."
         )
-    reason = reason[:MAX_REASON_CHARS]
+    reason = reason[:MAX_REASON_CHARS].rstrip()
 
     return {"decision": decision, "category": category, "reason": reason}
 
