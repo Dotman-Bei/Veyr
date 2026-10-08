@@ -1,7 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="8" fill="#1d1749"/>
-  <path d="M8 9.5 16 22.5 24 9.5" stroke="#f6eee2" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="8" cy="9.5" r="2.2" fill="#f6eee2"/>
-  <circle cx="24" cy="9.5" r="2.2" fill="#f6eee2"/>
-  <circle cx="16" cy="22.5" r="3" fill="#e0703f"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Veyr"><title>Veyr</title><rect width="64" height="64" rx="15" fill="#1E174F"/><g transform="translate(11 11)"><path d="M0 0H11.5L21 18.095L30.5 0H42L26.25 30H15.75Z" fill="#F7F1E9"/><rect x="15.75" y="34" width="10.5" height="8" rx="1.5" fill="#E2622B"/></g></svg>
