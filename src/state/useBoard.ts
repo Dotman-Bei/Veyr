@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toVeyrError, type VeyrError } from '@/lib/errors';
 import type { BoardStats, Post, VeyrContract } from '@/lib/genlayer';
+import { browserStorage, loadSnapshot, saveSnapshot, snapshotKey } from '@/lib/snapshot';
 
 export interface BoardState {
   topic: string | null;
@@ -10,22 +11,32 @@ export interface BoardState {
   refreshing: boolean;
   error: VeyrError | null;
   updatedAt: number | null;
+  /** True while showing the last-visit snapshot, before the first fresh chain read completes. */
+  fromSnapshot: boolean;
   /** Re-read posts and stats from chain; resolves with the fresh newest-first posts. */
   refresh: () => Promise<Post[]>;
 }
 
 const AUTO_REFRESH_MS = 60_000;
 
-/** Canonical forum state, read directly from the contract (no backend, no cache). */
+/**
+ * Canonical forum state, read directly from the contract. Reads stay sequential
+ * (public RPC rate limits) but each result renders as soon as it arrives, and a
+ * repeat visit paints the last snapshot until the fresh reads land.
+ */
 export function useBoard(contract: VeyrContract): BoardState {
-  const [topic, setTopic] = useState<string | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [stats, setStats] = useState<BoardStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const key = snapshotKey(contract.config.network, contract.config.contractAddress);
+  const [snapshot] = useState(() => loadSnapshot(browserStorage(), key));
+  const [topic, setTopic] = useState<string | null>(snapshot?.topic ?? null);
+  const [posts, setPosts] = useState<Post[]>(snapshot?.posts ?? []);
+  const [stats, setStats] = useState<BoardStats | null>(snapshot?.stats ?? null);
+  const [fromSnapshot, setFromSnapshot] = useState(Boolean(snapshot));
+  const [loading, setLoading] = useState(!snapshot);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<VeyrError | null>(null);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const inFlight = useRef<Promise<Post[]> | null>(null);
+  // The topic is re-read once per visit, even when a snapshot provided one.
   const topicRef = useRef<string | null>(null);
 
   const refresh = useCallback(() => {
@@ -39,11 +50,15 @@ export function useBoard(contract: VeyrContract): BoardState {
           setTopic(topicRef.current);
         }
         const nextPosts = await contract.readPosts();
-        const nextStats = await contract.readStats();
         setPosts(nextPosts);
+        setLoading(false);
+        const nextStats = await contract.readStats();
         setStats(nextStats);
+        setFromSnapshot(false);
         setError(null);
-        setUpdatedAt(Date.now());
+        const now = Date.now();
+        setUpdatedAt(now);
+        saveSnapshot(browserStorage(), key, { topic: topicRef.current, posts: nextPosts, stats: nextStats, savedAt: now });
         return nextPosts;
       } catch (err) {
         const veyr = toVeyrError(err);
@@ -57,7 +72,7 @@ export function useBoard(contract: VeyrContract): BoardState {
     })();
     inFlight.current = run;
     return run;
-  }, [contract]);
+  }, [contract, key]);
 
   useEffect(() => {
     refresh().catch(() => {});
@@ -79,5 +94,5 @@ export function useBoard(contract: VeyrContract): BoardState {
     };
   }, [refresh]);
 
-  return { topic, posts, stats, loading, refreshing, error, updatedAt, refresh };
+  return { topic, posts, stats, loading, refreshing, error, updatedAt, fromSnapshot, refresh };
 }

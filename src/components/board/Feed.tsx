@@ -67,7 +67,13 @@ export function Feed({ highlightIndex }: { highlightIndex?: number }) {
         </Button>
       </div>
       <p className="mt-2 text-xs text-muted-foreground" aria-live="polite">
-        {board.refreshing ? 'Reading contract state…' : updated ? `Read from chain at ${updated}` : ' '}
+        {board.fromSnapshot
+          ? 'Showing your last visit · reading fresh contract state…'
+          : board.refreshing
+            ? 'Reading contract state…'
+            : updated
+              ? `Read from chain at ${updated}`
+              : ' '}
       </p>
 
       {board.error && (
