@@ -1,5 +1,5 @@
 import { Menu } from 'lucide-react';
-import { Logo } from '@/components/brand/Logo';
+import { Logotype } from '@/components/brand/Logo';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { navigation } from '@/content';
 import { useScrolled } from '@/hooks/useScrolled';
@@ -26,16 +26,8 @@ export function NavBar() {
           scrolled ? 'p-3 lg:px-6' : 'p-6 lg:px-8',
         )}
       >
-        <a href="#top" className="flex items-center gap-2 rounded-md">
-          <Logo className={cn('transition-all duration-500', scrolled ? 'size-7' : 'size-8')} />
-          <span
-            className={cn(
-              'font-display font-extrabold tracking-tight transition-all duration-300',
-              scrolled ? 'text-sm' : 'text-base',
-            )}
-          >
-            Veyr
-          </span>
+        <a href="#top" className="flex items-center rounded-md" aria-label="Veyr, back to top">
+          <Logotype className={cn('w-auto transition-all duration-300', scrolled ? 'h-7' : 'h-8')} title="Veyr" />
         </a>
 
         <ul className="hidden items-center gap-x-8 lg:flex">
@@ -59,9 +51,8 @@ export function NavBar() {
               <span className="sr-only">Open main menu</span>
             </SheetTrigger>
             <SheetContent>
-              <SheetTitle className="flex items-center gap-2 text-base">
-                <Logo className="size-7" />
-                <span>Veyr</span>
+              <SheetTitle className="flex items-center">
+                <Logotype className="h-6" />
               </SheetTitle>
               <SheetDescription className="sr-only">Site navigation and wallet</SheetDescription>
               <ul className="mt-4 divide-y divide-border">

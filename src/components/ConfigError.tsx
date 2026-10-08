@@ -1,5 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
-import { Logo } from '@/components/brand/Logo';
+import { AppIcon } from '@/components/brand/Logo';
 
 /** Shown instead of the app when env configuration is missing or invalid. */
 export function ConfigError({ errors }: { errors: string[] }) {
@@ -7,7 +7,7 @@ export function ConfigError({ errors }: { errors: string[] }) {
     <main className="flex min-h-screen items-center justify-center bg-background p-6">
       <div className="w-full max-w-lg rounded-xl border bg-card p-8 shadow-xl">
         <div className="flex items-center gap-3">
-          <Logo />
+          <AppIcon />
           <h1 className="text-2xl">Veyr is not configured</h1>
         </div>
         <ul className="mt-6 space-y-3">

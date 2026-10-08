@@ -1,4 +1,4 @@
-import { Logo } from '@/components/brand/Logo';
+import { Logotype } from '@/components/brand/Logo';
 import { footerNavigation } from '@/content';
 import { addressUrl } from '@/lib/config';
 import { shortAddress } from '@/lib/utils';
@@ -15,10 +15,7 @@ export function Footer() {
           Footer
         </h2>
         <div className="max-w-xs">
-          <div className="flex items-center gap-2">
-            <Logo className="size-7" />
-            <span className="font-display text-lg font-extrabold">Veyr</span>
-          </div>
+          <Logotype className="h-7" />
           <p className="mt-4 text-xs text-muted-foreground">
             A decentralized community forum moderated by GenLayer validator consensus.
           </p>
