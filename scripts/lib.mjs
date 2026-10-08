@@ -92,12 +92,13 @@ const DONE = new Set(['ACCEPTED', 'FINALIZED']);
  */
 export function executionError(tx) {
   if (tx?.txExecutionResultName === 'FINISHED_WITH_ERROR') return 'execution finished with error';
-  const receipts = tx?.consensus_data?.leader_receipt ?? [];
-  const receipt = receipts[receipts.length - 1];
+  // Validator receipts follow the leader's (an idle validator reports ERROR/"idle").
+  const leaders = (tx?.consensus_data?.leader_receipt ?? []).filter((r) => (r.mode ?? 'leader') === 'leader');
+  const receipt = leaders[leaders.length - 1];
   if (!receipt) return null;
-  const status = receipt.result?.status;
-  if (receipt.execution_result === 'ERROR' || status === 'rollback' || status === 'error') {
-    return String(receipt.result?.payload ?? receipt.error ?? 'execution failed');
+  const result = typeof receipt.result === 'object' ? receipt.result : null;
+  if (receipt.execution_result === 'ERROR' || result?.status === 'rollback' || result?.status === 'error') {
+    return String(result?.payload ?? receipt.error ?? 'execution failed');
   }
   return null;
 }

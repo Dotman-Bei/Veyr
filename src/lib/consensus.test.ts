@@ -119,6 +119,31 @@ describe('executionError', () => {
       executionError({ consensus_data: { leader_receipt: [{ execution_result: 'ERROR', result: { status: 'rollback', payload: 'nope' } }] } }),
     ).toBe('nope');
     expect(executionError({ txExecutionResultName: 'FINISHED_WITH_ERROR' })).toMatch(/error/);
+  });
+
+  it('ignores idle validator receipts appended after a successful leader (real Studionet shape)', () => {
+    const tx: ChainTransaction = {
+      statusName: 'ACCEPTED',
+      consensus_data: {
+        leader_receipt: [
+          { mode: 'leader', execution_result: 'SUCCESS', result: { status: 'return', payload: {} } },
+          { mode: 'validator', execution_result: 'ERROR', result: 'AmlkbGU=' },
+        ],
+      },
+    };
+    expect(executionError(tx)).toBeNull();
+  });
+
+  it('still reports a rolled-back leader even when validators follow it', () => {
+    const tx: ChainTransaction = {
+      consensus_data: {
+        leader_receipt: [
+          { mode: 'leader', execution_result: 'ERROR', result: { status: 'rollback', payload: 'post text cannot be empty' } },
+          { mode: 'validator', execution_result: 'ERROR', result: { status: 'rollback', payload: 'post text cannot be empty' } },
+        ],
+      },
+    };
+    expect(executionError(tx)).toBe('post text cannot be empty');
     expect(executionError({})).toBeNull();
   });
 });

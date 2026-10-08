@@ -14,8 +14,9 @@ export interface ChainTransaction {
   txExecutionResultName?: string;
   consensus_data?: {
     leader_receipt?: Array<{
+      mode?: string;
       execution_result?: string;
-      result?: { status?: string; payload?: unknown } | null;
+      result?: { status?: string; payload?: unknown } | string | null;
       error?: string | null;
     }>;
   };
@@ -31,15 +32,18 @@ export function statusOf(tx: ChainTransaction | null | undefined): string {
 /**
  * The contract error if the accepted execution failed, else null. Bradbury-style
  * RPCs set txExecutionResultName; Studionet only marks the leader receipt.
+ * The receipt list also holds validator receipts (an idle validator reports
+ * ERROR/"idle"), so only the accepted leader's receipt is consulted.
  */
 export function executionError(tx: ChainTransaction): string | null {
   if (tx.txExecutionResultName === 'FINISHED_WITH_ERROR') return 'execution finished with error';
   const receipts = tx.consensus_data?.leader_receipt ?? [];
-  const receipt = receipts[receipts.length - 1];
+  const leaders = receipts.filter((r) => (r.mode ?? 'leader') === 'leader');
+  const receipt = leaders[leaders.length - 1];
   if (!receipt) return null;
-  const status = receipt.result?.status;
-  if (receipt.execution_result === 'ERROR' || status === 'rollback' || status === 'error') {
-    return String(receipt.result?.payload ?? receipt.error ?? 'execution failed');
+  const result = typeof receipt.result === 'object' ? receipt.result : null;
+  if (receipt.execution_result === 'ERROR' || result?.status === 'rollback' || result?.status === 'error') {
+    return String(result?.payload ?? receipt.error ?? 'execution failed');
   }
   return null;
 }
