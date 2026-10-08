@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useVeyr } from '@/state/VeyrContext';
@@ -70,9 +70,27 @@ function Node({ ring, angle, duration }: (typeof NODES)[number]) {
 export function ConsensusOrbit({ className }: { className?: string }) {
   const { board } = useVeyr();
   const stats = board.stats;
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(true);
+
+  // Nine infinite animations are cheap but not free: pause them while offscreen.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className={cn('relative mx-auto aspect-square w-full max-w-[500px] overflow-hidden', className)}>
+    <div
+      ref={ref}
+      data-paused={visible ? undefined : ''}
+      className={cn(
+        'relative mx-auto aspect-square w-full max-w-[500px] overflow-hidden [contain:layout_paint] [&[data-paused]_*]:[animation-play-state:paused]',
+        className,
+      )}
+    >
       {RINGS.map((ring) => (
         <Ring key={ring.size} {...ring} />
       ))}
