@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { createAccount } from 'genlayer-js';
 import type { AppConfig } from '@/lib/config';
 import { VeyrError, toVeyrError } from '@/lib/errors';
-import type { Signer } from '@/lib/genlayer';
+import { loadSdk, type Signer } from '@/lib/genlayer';
 import {
   connectWallet,
   ensureChain,
@@ -133,10 +132,17 @@ export function useWallet(config: AppConfig, onAccountChanged?: (account: string
     setChainId(config.chain.id);
   }, [account, provider, config.chain]);
 
-  const devAddress = useMemo(
-    () => (config.devPrivateKey ? createAccount(config.devPrivateKey).address : null),
-    [config.devPrivateKey],
-  );
+  // Dev-key fallback address (development only); derived once the SDK has loaded.
+  const [devAddress, setDevAddress] = useState<`0x${string}` | null>(null);
+  useEffect(() => {
+    const key = config.devPrivateKey;
+    if (!key) return setDevAddress(null);
+    let active = true;
+    loadSdk().then(({ sdk }) => active && setDevAddress(sdk.createAccount(key).address));
+    return () => {
+      active = false;
+    };
+  }, [config.devPrivateKey]);
 
   const signer: Signer | null = useMemo(() => {
     if (account && provider) return { kind: 'wallet', address: account, provider };
@@ -152,7 +158,7 @@ export function useWallet(config: AppConfig, onAccountChanged?: (account: string
     connecting,
     error,
     signer,
-    signerAddress: account ?? (devAddress as `0x${string}` | null),
+    signerAddress: account ?? devAddress,
     connect,
     disconnect,
     switchNetwork,

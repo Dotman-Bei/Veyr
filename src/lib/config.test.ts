@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import * as sdkChains from 'genlayer-js/chains';
 import { studionet } from 'genlayer-js/chains';
-import { addressUrl, parseConfig, txUrl } from './config';
+import { NETWORKS, addressUrl, parseConfig, txUrl } from './config';
 
 const ADDRESS = '0xC1C38084e9bf9f0A3a7016fA0470b5E4c436bEE3';
 
@@ -65,5 +66,18 @@ describe('parseConfig', () => {
 
     const bad = parseConfig({ VITE_GENLAYER_CONTRACT_ADDRESS: ADDRESS, VITE_GENLAYER_ACCOUNT_PRIVATE_KEY: '0x12' });
     expect(bad.ok).toBe(false);
+  });
+});
+
+describe('NETWORKS', () => {
+  it('matches the genlayer-js chain definitions it stands in for', () => {
+    for (const name of Object.keys(NETWORKS) as Array<keyof typeof NETWORKS>) {
+      const ours = NETWORKS[name];
+      const sdk = sdkChains[name];
+      expect(ours.id).toBe(sdk.id);
+      expect(ours.name).toBe(sdk.name);
+      expect(ours.rpcUrls.default.http[0]).toBe(sdk.rpcUrls.default.http[0]);
+      expect(ours.nativeCurrency).toEqual(sdk.nativeCurrency);
+    }
   });
 });

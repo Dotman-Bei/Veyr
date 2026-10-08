@@ -42,11 +42,12 @@ export default defineConfig({
   build: {
     rolldownOptions: {
       output: {
-        // Keep the large GenLayer SDK (viem + chain ABIs) and React in their own
-        // long-lived cacheable chunks, separate from app code.
+        // React and UI vendors in long-lived cacheable chunks. The GenLayer SDK is
+        // dynamically imported (src/lib/genlayer.ts) and gets its own lazy chunk;
+        // a manual group for it would also capture Vite's preload helper and drag
+        // the whole SDK back into the critical path.
         codeSplitting: {
           groups: [
-            { name: 'genlayer', test: /node_modules[\\/](genlayer-js|viem|ox|abitype|@noble|@scure)/ },
             { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/ },
             { name: 'ui', test: /node_modules[\\/](@radix-ui|lucide-react|sonner)/ },
           ],

@@ -4,7 +4,7 @@
 // responsible for making sure the wallet is on the configured GenLayer chain
 // before any write is signed.
 
-import type { GenLayerChain } from './config';
+import type { ChainInfo } from './config';
 import { VeyrError, toVeyrError } from './errors';
 
 export interface Eip1193Provider {
@@ -56,7 +56,7 @@ export async function getChainId(provider: Eip1193Provider): Promise<number | nu
   }
 }
 
-export function addChainParams(chain: GenLayerChain) {
+export function addChainParams(chain: ChainInfo) {
   const explorer = chain.blockExplorers?.default?.url;
   return {
     chainId: toHexChainId(chain.id),
@@ -68,7 +68,7 @@ export function addChainParams(chain: GenLayerChain) {
 }
 
 /** Switch the wallet to the configured chain, adding it first if unknown. */
-export async function ensureChain(provider: Eip1193Provider, chain: GenLayerChain): Promise<void> {
+export async function ensureChain(provider: Eip1193Provider, chain: ChainInfo): Promise<void> {
   if ((await getChainId(provider)) === chain.id) return;
   const chainId = toHexChainId(chain.id);
   try {
@@ -95,7 +95,7 @@ export async function ensureChain(provider: Eip1193Provider, chain: GenLayerChai
 }
 
 /** Prompt for account access and make sure the wallet is on the right chain. */
-export async function connectWallet(chain: GenLayerChain): Promise<`0x${string}`> {
+export async function connectWallet(chain: ChainInfo): Promise<`0x${string}`> {
   const provider = requireProvider();
   let account: `0x${string}` | null;
   try {

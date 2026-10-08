@@ -3,29 +3,50 @@
 // Every value is validated up front so a misconfigured build shows a clear
 // message instead of failing later with an opaque RPC error.
 
-import { localnet, studionet } from 'genlayer-js/chains';
+// Plain chain metadata (no SDK import) so configuration, wallet setup and first
+// paint do not wait for the large genlayer-js bundle, which loads lazily.
+// config.test.ts checks these values against genlayer-js's own chain definitions.
 
-export const NETWORKS = { studionet, localnet } as const;
+export interface ChainInfo {
+  id: number;
+  name: string;
+  nativeCurrency: { name: string; symbol: string; decimals: number };
+  rpcUrls: { default: { http: readonly string[] } };
+  blockExplorers?: { default: { name: string; url: string } };
+}
+
+const GEN = { name: 'GEN Token', symbol: 'GEN', decimals: 18 };
+
+export const NETWORKS = {
+  studionet: {
+    id: 61999,
+    name: 'Genlayer Studio Network',
+    nativeCurrency: GEN,
+    rpcUrls: { default: { http: ['https://studio.genlayer.com/api'] } },
+    blockExplorers: { default: { name: 'GenLayer Studio Explorer', url: 'https://explorer-studio.genlayer.com' } },
+  },
+  localnet: {
+    id: 61127,
+    name: 'Genlayer Localnet',
+    nativeCurrency: GEN,
+    rpcUrls: { default: { http: ['http://127.0.0.1:4000/api'] } },
+  },
+} as const satisfies Record<string, ChainInfo>;
 export type NetworkName = keyof typeof NETWORKS;
-export type GenLayerChain = (typeof NETWORKS)[NetworkName];
 
-/** Studio explorer for each network (the chain's own default URL is not the Studio one). */
+/** Human-readable label for the UI. */
 const LABELS: Record<NetworkName, string> = {
   studionet: 'GenLayer Studionet',
   localnet: 'GenLayer Localnet',
 };
 
-const EXPLORERS: Record<NetworkName, string | null> = {
-  studionet: 'https://explorer-studio.genlayer.com',
-  localnet: null,
-};
 
 export interface AppConfig {
   network: NetworkName;
   /** Human-readable network name for the UI. */
   networkLabel: string;
   explorerUrl: string | null;
-  chain: GenLayerChain;
+  chain: ChainInfo;
   contractAddress: `0x${string}`;
   rpcUrl: string;
   rpcOverridden: boolean;
@@ -49,7 +70,7 @@ const PRIVATE_KEY = /^0x[0-9a-fA-F]{64}$/;
  * chain object it is given when `endpoint` is set, so we never pass the shared
  * export directly.
  */
-function withRpc(chain: GenLayerChain, rpcUrl: string): GenLayerChain {
+function withRpc(chain: ChainInfo, rpcUrl: string): ChainInfo {
   return { ...chain, rpcUrls: { ...chain.rpcUrls, default: { http: [rpcUrl] } } };
 }
 
@@ -101,7 +122,7 @@ export function parseConfig(env: RawEnv): ConfigResult {
     config: {
       network,
       networkLabel: LABELS[network],
-      explorerUrl: EXPLORERS[network],
+      explorerUrl: 'blockExplorers' in baseChain ? baseChain.blockExplorers.default.url : null,
       chain,
       contractAddress: contractAddress as `0x${string}`,
       rpcUrl: chain.rpcUrls.default.http[0],

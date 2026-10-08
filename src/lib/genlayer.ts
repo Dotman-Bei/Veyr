@@ -3,7 +3,6 @@
 // All canonical forum state (topic, posts, counts, reputation, verdicts) is
 // read directly from the contract. The frontend never decides a verdict.
 
-import { createAccount, createClient } from 'genlayer-js';
 import type { AppConfig } from './config';
 import { VeyrError } from './errors';
 import { waitForConsensus, type ChainTransaction, type WaitOptions } from './consensus';
@@ -28,7 +27,23 @@ export interface BoardStats {
   approved: number;
 }
 
-type Client = ReturnType<typeof createClient>;
+type Sdk = typeof import('genlayer-js');
+type Chains = typeof import('genlayer-js/chains');
+type Client = ReturnType<Sdk['createClient']>;
+
+let sdkPromise: Promise<{ sdk: Sdk; chains: Chains }> | null = null;
+
+/**
+ * genlayer-js (with viem and the consensus ABIs) is by far the largest part of
+ * the bundle, and nothing needs it to paint. It is loaded on demand, once.
+ */
+export function loadSdk() {
+  sdkPromise ??= Promise.all([import('genlayer-js'), import('genlayer-js/chains')]).then(([sdk, chains]) => ({
+    sdk,
+    chains,
+  }));
+  return sdkPromise;
+}
 
 export type Signer =
   | { kind: 'wallet'; address: `0x${string}`; provider: Eip1193Provider }
@@ -68,16 +83,25 @@ export function parsePost(record: unknown): Post {
 
 export class VeyrContract {
   readonly config: AppConfig;
-  private readonly reader: Client;
+  private readonly ready: Promise<{ sdk: Sdk; chain: Chains[AppConfig['network']]; reader: Client }>;
 
   constructor(config: AppConfig) {
     this.config = config;
-    // Reads need no funds; an ephemeral account only provides a `from` address.
-    this.reader = createClient({ chain: config.chain, account: createAccount() });
+    // Start downloading the SDK immediately, in parallel with first render.
+    this.ready = loadSdk().then(({ sdk, chains }) => {
+      // The SDK's full chain definition (consensus contracts, ABIs) with our RPC.
+      // Cloned because createClient mutates the chain it is given.
+      const base = chains[config.network];
+      const chain = { ...base, rpcUrls: { ...base.rpcUrls, default: { http: [config.rpcUrl] } } };
+      // Reads need no funds; an ephemeral account only provides a `from` address.
+      const reader = sdk.createClient({ chain, account: sdk.createAccount() });
+      return { sdk, chain, reader };
+    });
   }
 
-  private read(functionName: string, args: Array<string | number> = []) {
-    return withRetry(() => this.reader.readContract({ address: this.config.contractAddress, functionName, args }));
+  private async read(functionName: string, args: Array<string | number> = []) {
+    const { reader } = await this.ready;
+    return withRetry(() => reader.readContract({ address: this.config.contractAddress, functionName, args }));
   }
 
   async readTopic(): Promise<string> {
@@ -102,11 +126,12 @@ export class VeyrContract {
     return toNumber(await this.read('get_reputation', [author]));
   }
 
-  private writer(signer: Signer): Client {
+  private async writer(signer: Signer): Promise<Client> {
+    const { sdk, chain } = await this.ready;
     if (signer.kind === 'wallet') {
-      return createClient({ chain: this.config.chain, account: signer.address, provider: signer.provider });
+      return sdk.createClient({ chain, account: signer.address, provider: signer.provider });
     }
-    return createClient({ chain: this.config.chain, account: createAccount(signer.privateKey) });
+    return sdk.createClient({ chain, account: sdk.createAccount(signer.privateKey) });
   }
 
   /** Send submit_post(text); resolves with the transaction hash once signed. */
@@ -115,7 +140,8 @@ export class VeyrContract {
     if (!trimmed) throw new VeyrError('validation', 'Your post is empty. Write something first.');
     if (trimmed.length > MAX_POST_CHARS) throw new VeyrError('validation', 'Your post is longer than 2,000 characters.');
 
-    const hash = await this.writer(signer).writeContract({
+    const writer = await this.writer(signer);
+    const hash = await writer.writeContract({
       address: this.config.contractAddress,
       functionName: 'submit_post',
       args: [trimmed],
@@ -127,10 +153,11 @@ export class VeyrContract {
     return hash as `0x${string}`;
   }
 
-  waitForConsensus(hash: `0x${string}`, options?: WaitOptions): Promise<ChainTransaction> {
+  async waitForConsensus(hash: `0x${string}`, options?: WaitOptions): Promise<ChainTransaction> {
     type TxHash = Parameters<Client['getTransaction']>[0]['hash'];
+    const { reader } = await this.ready;
     return waitForConsensus(
-      (h) => this.reader.getTransaction({ hash: h as TxHash }) as Promise<ChainTransaction>,
+      (h) => reader.getTransaction({ hash: h as TxHash }) as Promise<ChainTransaction>,
       hash,
       options,
     );
