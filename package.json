@@ -11,7 +11,7 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:contract": ".venv/bin/pytest tests/direct -v",
-    "test:integration": ".venv/bin/gltest tests/integration -v -s --network studionet",
+    "test:integration": ".venv/bin/gltest tests/integration -v -s --network studionet --contracts-dir contract",
     "deploy": "node scripts/deploy.mjs",
     "live-test": "node scripts/live-test.mjs"
   },
