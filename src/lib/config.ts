@@ -10,6 +10,11 @@ export type NetworkName = keyof typeof NETWORKS;
 export type GenLayerChain = (typeof NETWORKS)[NetworkName];
 
 /** Studio explorer for each network (the chain's own default URL is not the Studio one). */
+const LABELS: Record<NetworkName, string> = {
+  studionet: 'GenLayer Studionet',
+  localnet: 'GenLayer Localnet',
+};
+
 const EXPLORERS: Record<NetworkName, string | null> = {
   studionet: 'https://explorer-studio.genlayer.com',
   localnet: null,
@@ -17,6 +22,8 @@ const EXPLORERS: Record<NetworkName, string | null> = {
 
 export interface AppConfig {
   network: NetworkName;
+  /** Human-readable network name for the UI. */
+  networkLabel: string;
   explorerUrl: string | null;
   chain: GenLayerChain;
   contractAddress: `0x${string}`;
@@ -93,6 +100,7 @@ export function parseConfig(env: RawEnv): ConfigResult {
     ok: true,
     config: {
       network,
+      networkLabel: LABELS[network],
       explorerUrl: EXPLORERS[network],
       chain,
       contractAddress: contractAddress as `0x${string}`,

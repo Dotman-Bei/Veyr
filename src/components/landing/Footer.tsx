@@ -31,7 +31,7 @@ export function Footer() {
             ) : (
               <span title={config.contractAddress}>{shortAddress(config.contractAddress)}</span>
             )}{' '}
-            on {config.chain.name}
+            on {config.networkLabel}
           </p>
         </div>
         <div className="flex gap-20">

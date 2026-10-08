@@ -61,7 +61,7 @@ export function Composer({ onSettled }: { onSettled: (post: Post) => void }) {
   } else if (wallet.wrongNetwork) {
     action = (
       <Button type="button" variant="outline" className="border-warning/50 text-warning" onClick={() => wallet.switchNetwork().catch((err) => toast.error(err.message))}>
-        <AlertTriangle aria-hidden /> Switch to {config.network === 'studionet' ? 'Studionet' : config.chain.name}
+        <AlertTriangle aria-hidden /> Switch to {config.networkLabel.replace('GenLayer ', '')}
       </Button>
     );
   } else {

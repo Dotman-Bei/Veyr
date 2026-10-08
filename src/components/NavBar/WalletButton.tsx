@@ -28,7 +28,7 @@ export function WalletButton({ compact = false, className }: { compact?: boolean
     return (
       <Button variant="outline" size="sm" onClick={switchNetwork} className={cn('border-warning/50 text-warning', className)}>
         <AlertTriangle aria-hidden />
-        Switch to {config.network === 'studionet' ? 'Studionet' : config.chain.name}
+        Switch to {config.networkLabel.replace('GenLayer ', '')}
       </Button>
     );
   }

@@ -5,7 +5,7 @@ import { useVeyr } from '@/state/VeyrContext';
 export function Announcement() {
   const { config } = useVeyr();
   const href = addressUrl(config, config.contractAddress);
-  const network = config.network === 'studionet' ? 'GenLayer Studionet' : config.chain.name;
+  const network = config.networkLabel;
 
   return (
     <div className="flex items-center justify-center gap-3 bg-linear-to-r from-accent to-secondary-muted p-3 text-center text-sm font-semibold text-accent-foreground">
