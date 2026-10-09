@@ -15,11 +15,17 @@ Browser ──wallet / genlayer-js──▶ GenLayer Studionet ──▶ Veyr In
 | | |
 |---|---|
 | Network | GenLayer **Studionet** (`https://studio.genlayer.com/api`, chain id `61999`) |
-| Contract | [`0xC1C38084e9bf9f0A3a7016fA0470b5E4c436bEE3`](https://explorer-studio.genlayer.com/address/0xC1C38084e9bf9f0A3a7016fA0470b5E4c436bEE3) |
-| Deployment tx | [`0xf174c2e2…f63c61ad`](https://explorer-studio.genlayer.com/tx/0xf174c2e254ad587360c86d3147a693d7abd65eff24f869fdb6d21052f63c61ad) |
+| Contract | [`0xf574dA61649ccAcbd84B492984e244D08d88a34a`](https://explorer-studio.genlayer.com/address/0xf574dA61649ccAcbd84B492984e244D08d88a34a) |
+| Deployment tx | [`0x6eba6634…0c36137ddb`](https://explorer-studio.genlayer.com/tx/0x6eba663481e9ecb69ff91c20707b0dccf22003030fa676476dd89e0c36137ddb) |
 | Topic | `GenLayer and blockchain development` |
 
-The machine-readable record is in [deployments/studionet.json](deployments/studionet.json).
+This is the launch contract: it started with an empty feed, and its on-chain code is byte-identical to `contract/veyr.py`. Records:
+
+- [deployments/studionet.json](deployments/studionet.json): the launch contract above.
+- [deployments/studionet-smoke-test.json](deployments/studionet-smoke-test.json): a separate contract from the same source. The live smoke test runs there, so its example posts (including a deliberately toxic one) never appear in the public feed. The latest runs passed all 16 assertions: one APPROVE and one REJECT, with counts and reputation checked.
+- [deployments/archive/](deployments/archive/): the retired development contract, which holds the test posts from building the app.
+
+`npm run live-test` targets the smoke-test contract by default. It refuses to post into the launch contract unless run with `--allow-launch-contract`, and `LIVE_TEST_CONTRACT=0x…` points it at any other contract.
 
 ## How moderation works
 
@@ -106,7 +112,7 @@ If a run is interrupted, the tx hash is kept in `.deploy-state.json` and the nex
 npm run test:contract      # 33 direct-mode contract tests (mocked LLM, ~2s)
 npm test                   # 49 frontend unit tests (vitest)
 npm run test:integration   # deploys a fresh contract to Studionet, real consensus
-npm run live-test          # smoke test against the deployed contract
+npm run live-test          # smoke test on the smoke-test contract (never the launch feed)
 ```
 
 - **Direct tests** cover initialization, validation, persistence, newest-first ordering, counts and reputation. They also cover output normalization (fences, prose, casing, unknown categories, bounded reasons), malformed output never mutating state, the agreement rule via `run_validator()` (agree, disagree, leader error, malformed proposal), and prompt-injection framing including delimiter-escape attempts.

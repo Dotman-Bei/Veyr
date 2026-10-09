@@ -1,10 +1,10 @@
 {
   "network": "studionet",
   "chainId": 61999,
-  "contractAddress": "0xC1C38084e9bf9f0A3a7016fA0470b5E4c436bEE3",
-  "deploymentTxHash": "0xf174c2e254ad587360c86d3147a693d7abd65eff24f869fdb6d21052f63c61ad",
+  "contractAddress": "0xf574dA61649ccAcbd84B492984e244D08d88a34a",
+  "deploymentTxHash": "0x6eba663481e9ecb69ff91c20707b0dccf22003030fa676476dd89e0c36137ddb",
   "status": "ACCEPTED",
   "deployer": "0x93Ed65c17653CC241D5297BE39eA8C94997873b1",
   "topic": "GenLayer and blockchain development",
-  "deployedAt": "2026-10-08T14:40:01.787Z"
+  "deployedAt": "2026-10-09T13:05:27.554Z"
 }
