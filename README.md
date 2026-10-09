@@ -12,8 +12,11 @@ Browser ──wallet / genlayer-js──▶ GenLayer Studionet ──▶ Veyr In
 
 ## Live deployment
 
+**Try it: [veyr-eight.vercel.app](https://veyr-eight.vercel.app/)**
+
 | | |
 |---|---|
+| App | **[veyr-eight.vercel.app](https://veyr-eight.vercel.app/)** (Vercel, auto-deploys from `main`) |
 | Network | GenLayer **Studionet** (`https://studio.genlayer.com/api`, chain id `61999`) |
 | Contract | [`0xf574dA61649ccAcbd84B492984e244D08d88a34a`](https://explorer-studio.genlayer.com/address/0xf574dA61649ccAcbd84B492984e244D08d88a34a) |
 | Deployment tx | [`0x6eba6634…0c36137ddb`](https://explorer-studio.genlayer.com/tx/0x6eba663481e9ecb69ff91c20707b0dccf22003030fa676476dd89e0c36137ddb) |

@@ -40,5 +40,10 @@
     "typescript": "~5.8",
     "vite": "^8.3.4",
     "vitest": "^5.0.3"
+  },
+  "homepage": "https://veyr-eight.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dotman-Bei/Veyr.git"
   }
 }
