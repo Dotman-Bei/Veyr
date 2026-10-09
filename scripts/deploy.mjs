@@ -4,15 +4,18 @@
 //   npm run deploy                      # deploy, or resume a pending deployment
 //   npm run deploy -- --resume 0x<hash> # resume tracking a known tx hash
 //   npm run deploy -- --fresh           # ignore any pending deployment state
+//   npm run deploy -- --record deployments/studionet-smoke.json
+//                                       # write the record elsewhere (e.g. a throwaway test contract)
 //
 // Reads GENLAYER_PRIVATE_KEY and MODERATION_TOPIC from the environment / .env.
-// On success writes deployments/<network>.json (address + tx hash, no secrets).
+// On success writes deployments/<network>.json (address + tx hash, no secrets),
+// or the path given with --record.
 //
 // Interrupted runs are NOT blindly redeployed: the tx hash is saved to
 // .deploy-state.json before waiting, and the next run resumes tracking it.
 
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import {
   ROOT,
   fail,
@@ -29,13 +32,15 @@ const STATE_PATH = join(ROOT, '.deploy-state.json');
 const MIN_BALANCE_WEI = 10n ** 18n; // 1 GEN is plenty for Studionet writes
 
 function parseArgs(argv) {
-  const args = { resume: null, fresh: false };
+  const args = { resume: null, fresh: false, record: null };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--resume') args.resume = argv[++i];
     else if (argv[i] === '--fresh') args.fresh = true;
+    else if (argv[i] === '--record') args.record = argv[++i];
     else fail(`Unknown argument: ${argv[i]}`);
   }
   if (args.resume && !/^0x[0-9a-fA-F]{64}$/.test(args.resume)) fail('--resume expects a 32-byte tx hash.');
+  if (args.record !== null && !/^[\w./-]+\.json$/.test(args.record ?? '')) fail('--record expects a .json path.');
   return args;
 }
 
@@ -139,16 +144,19 @@ async function main() {
     topic,
     deployedAt: new Date().toISOString(),
   };
-  mkdirSync(join(ROOT, 'deployments'), { recursive: true });
-  writeFileSync(join(ROOT, 'deployments', `${network}.json`), toJson(record) + '\n');
+  const recordPath = args.record ?? join('deployments', `${network}.json`);
+  mkdirSync(dirname(join(ROOT, recordPath)), { recursive: true });
+  writeFileSync(join(ROOT, recordPath), toJson(record) + '\n');
   rmSync(STATE_PATH, { force: true });
 
   console.log('\n✔ Deployment accepted and verified.');
   console.log(`  contract:  ${address}`);
   console.log(`  tx hash:   ${hash}`);
-  console.log(`  saved:     deployments/${network}.json`);
-  console.log('\nSet this in your .env:');
-  console.log(`  VITE_GENLAYER_CONTRACT_ADDRESS=${address}`);
+  console.log(`  saved:     ${recordPath}`);
+  if (!args.record) {
+    console.log('\nSet this in your .env:');
+    console.log(`  VITE_GENLAYER_CONTRACT_ADDRESS=${address}`);
+  }
 }
 
 main().catch((err) => fail(`Deployment failed: ${err?.message ?? err}`));
