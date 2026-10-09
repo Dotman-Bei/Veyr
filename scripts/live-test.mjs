@@ -4,12 +4,46 @@
 // board back from chain state and asserts the recorded verdicts.
 //
 // Usage (from the project root):
-//   npm run live-test
+//   npm run live-test                         # targets the smoke-test contract
+//   LIVE_TEST_CONTRACT=0x… npm run live-test   # any other contract
 //
-// Requires GENLAYER_PRIVATE_KEY and VITE_GENLAYER_CONTRACT_ADDRESS (env / .env).
+// Target: LIVE_TEST_CONTRACT, else deployments/<network>-smoke-test.json, else
+// VITE_GENLAYER_CONTRACT_ADDRESS. It refuses to post into the launch contract
+// (deployments/<network>.json) unless run with --allow-launch-contract, because
+// the smoke test leaves permanent example posts, one of them deliberately toxic.
+//
+// Requires GENLAYER_PRIVATE_KEY (env / .env).
 // Exits non-zero when any assertion fails.
 
-import { fail, loadDotEnv, makeClient, read, sleep, waitForConsensus } from './lib.mjs';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { ROOT, fail, loadDotEnv, makeClient, read, resolveChain, sleep, waitForConsensus } from './lib.mjs';
+
+function recordAddress(file) {
+  const path = join(ROOT, 'deployments', file);
+  if (!existsSync(path)) return null;
+  try {
+    return JSON.parse(readFileSync(path, 'utf-8')).contractAddress ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Pick the contract to test, never silently the public launch contract. */
+function resolveTarget() {
+  const { name } = resolveChain();
+  const target =
+    process.env.LIVE_TEST_CONTRACT || recordAddress(`${name}-smoke-test.json`) || process.env.VITE_GENLAYER_CONTRACT_ADDRESS;
+  if (!target) fail('No contract to test: set LIVE_TEST_CONTRACT or deploy one with --record deployments/<network>-smoke-test.json.');
+  const launch = recordAddress(`${name}.json`);
+  if (launch && target.toLowerCase() === launch.toLowerCase() && !process.argv.includes('--allow-launch-contract')) {
+    fail(
+      `Refusing to post test content into the launch contract ${launch}.\n` +
+        'Use the smoke-test contract (default), set LIVE_TEST_CONTRACT, or pass --allow-launch-contract.',
+    );
+  }
+  return target;
+}
 
 const SAMPLES = [
   {
@@ -44,8 +78,7 @@ async function stats(client, address, author) {
 
 async function main() {
   loadDotEnv();
-  const address = process.env.VITE_GENLAYER_CONTRACT_ADDRESS;
-  if (!address) fail('VITE_GENLAYER_CONTRACT_ADDRESS is not set (environment or .env).');
+  const address = resolveTarget();
 
   const { client, account, network } = makeClient();
 
