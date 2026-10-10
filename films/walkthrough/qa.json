@@ -1,0 +1,10 @@
+{
+  "cuts": [[2591, 2593], [4175, 4177]],
+  "ignore": [[365, 375], [835, 870]],
+  "why": {
+    "2591-2593": "velocity cut, paper -> ink: the post accelerates up-right out of the composer and enters the contract still moving (b19, act seam submit->leader)",
+    "4175-4177": "velocity cut, ink -> paper: the post drops out of the contract and the board opens moving down (b30, act seam agree->verdict)",
+    "365-375": "ignored for every check (the border check misreads it): the composer card's hairline crosses the top edge during the hook's slow pull-back (inspected at full size: content crossing the frame edge, no gap or sliver)",
+    "835-870": "ignored for every check (the border check misreads it): a feed row's text line crosses the bottom edge during the board's slow push (inspected at full size, f852: content crossing the frame edge, no gap or sliver)"
+  }
+}

@@ -1,0 +1,220 @@
+{
+  "key": "D major",
+  "bpm": 100,
+  "chords": [
+    "Bm9",
+    "Gmaj9",
+    "Em9",
+    "A7sus4",
+    "Dmaj9",
+    "Bm9",
+    "Gmaj9",
+    "A7sus4",
+    "Dmaj9",
+    "Bm9",
+    "Gmaj9",
+    "A7sus4",
+    "Dmaj9",
+    "Bm9",
+    "Gmaj9",
+    "A7sus4",
+    "Dmaj9",
+    "Bm9",
+    "Bm9",
+    "Gmaj9",
+    "Em9",
+    "F#m7",
+    "Bm9",
+    "Gmaj9",
+    "Em9",
+    "F#m7",
+    "Em9",
+    "A7sus4",
+    "Dmaj9",
+    "Dmaj9",
+    "Bm9",
+    "Gmaj9",
+    "A7sus4",
+    "Bm9",
+    "Em9",
+    "Gmaj9",
+    "F#m7",
+    "A7sus4",
+    "Gmaj9",
+    "Em9",
+    "A7sus4",
+    "Dmaj9",
+    "Bm9",
+    "Gmaj9",
+    "Em9",
+    "A7sus4",
+    "Gmaj9",
+    "A7sus4",
+    "Dmaj9",
+    "-"
+  ],
+  "sections": [
+    {
+      "bars": [
+        1,
+        4
+      ],
+      "style": "intro"
+    },
+    {
+      "bars": [
+        5,
+        18
+      ],
+      "style": "groove",
+      "level": 0.62,
+      "layers": {
+        "drums": 0.5,
+        "arp": 0.6
+      }
+    },
+    {
+      "bars": [
+        19,
+        26
+      ],
+      "style": "breakdown",
+      "level": 0.62
+    },
+    {
+      "bars": [
+        27,
+        28
+      ],
+      "style": "build",
+      "level": 0.85
+    },
+    {
+      "bars": [
+        29,
+        29
+      ],
+      "style": "resolve",
+      "level": 1.0
+    },
+    {
+      "bars": [
+        30,
+        33
+      ],
+      "style": "groove",
+      "level": 0.7,
+      "layers": {
+        "drums": 0.6
+      }
+    },
+    {
+      "bars": [
+        34,
+        38
+      ],
+      "style": "groove",
+      "level": 0.68,
+      "layers": {
+        "drums": 0.6
+      }
+    },
+    {
+      "bars": [
+        39,
+        41
+      ],
+      "style": "breakdown",
+      "level": 0.55,
+      "layers": {
+        "drums": 0
+      }
+    },
+    {
+      "bars": [
+        42,
+        46
+      ],
+      "style": "groove",
+      "level": 0.66,
+      "layers": {
+        "drums": 0.7
+      }
+    },
+    {
+      "bars": [
+        47,
+        48
+      ],
+      "style": "breakdown",
+      "level": 0.5,
+      "layers": {
+        "drums": 0
+      }
+    },
+    {
+      "bars": [
+        49,
+        49
+      ],
+      "style": "resolve",
+      "level": 0.7,
+      "layers": {
+        "drums": 0
+      }
+    },
+    {
+      "bars": [
+        50,
+        50
+      ],
+      "style": "hold"
+    }
+  ],
+  "signature": {
+    "tick": "D6",
+    "tock": "A5",
+    "motif": [
+      0,
+      7,
+      14
+    ],
+    "rhythm": [
+      0,
+      0.5,
+      1.5
+    ]
+  },
+  "typing": "auto",
+  "progress": {
+    "match": "rung",
+    "kind": "pop",
+    "resolve": "@accepted"
+  },
+  "motifs": [
+    {
+      "at": "@seat",
+      "gain": 0.7
+    }
+  ],
+  "drops": [
+    {
+      "at": "@accepted",
+      "silence": "1/16"
+    }
+  ],
+  "payoff": "@accepted",
+  "mix": {
+    "music": 1.0,
+    "sfx": 1.3,
+    "reverb": 1.0,
+    "sidechain": 0.45,
+    "duck_db": 3,
+    "typing_duck_db": 6
+  },
+  "master": {
+    "lufs": -14,
+    "ceiling": 0.77,
+    "fade": 1.0
+  }
+}
