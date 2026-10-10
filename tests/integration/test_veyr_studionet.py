@@ -9,10 +9,12 @@ Run from the project root:
     # = gltest tests/integration -v -s --network studionet --contracts-dir contract
 """
 
+import time
+
 import pytest
 
 from gltest import get_contract_factory, get_default_account
-from gltest.assertions import tx_execution_succeeded
+from gltest.assertions import tx_execution_failed, tx_execution_succeeded
 
 TOPIC = "GenLayer and blockchain development"
 
@@ -36,6 +38,11 @@ def veyr():
 @pytest.fixture(scope="module")
 def author():
     return get_default_account().address
+
+
+def _wait_cooldown(contract):
+    """The contract allows one post per author per cooldown window."""
+    time.sleep(int(contract.get_limits().call()["cooldown_seconds"]) + 5)
 
 
 def _stats(contract, author):
@@ -63,9 +70,11 @@ def test_clean_on_topic_post_is_approved(veyr, author):
     assert newest["reason"]
     assert newest["author"].lower() == author.lower()
     assert _stats(veyr, author) == (posts + 1, approved + 1, rep + 1)
+    assert veyr.get_feed_page(args=[0, 1]).call()[0]["text"] == CLEAN_POST
 
 
 def test_toxic_post_is_rejected_and_still_stored(veyr, author):
+    _wait_cooldown(veyr)
     posts, approved, rep = _stats(veyr, author)
 
     tx = veyr.submit_post(args=[TOXIC_POST]).transact(**WAIT)
@@ -77,3 +86,15 @@ def test_toxic_post_is_rejected_and_still_stored(veyr, author):
     assert newest["category"] != "approved"
     assert newest["reason"]
     assert _stats(veyr, author) == (posts + 1, approved, rep - 1)
+    # enforced: the public feed never serves it; the audit pages keep it
+    assert all(p["text"] != TOXIC_POST for p in veyr.get_feed_page(args=[0, 50]).call())
+    assert veyr.get_posts_page(args=[0, 1]).call()[0]["text"] == TOXIC_POST
+
+
+def test_duplicate_is_refused_before_moderation(veyr, author):
+    _wait_cooldown(veyr)
+    posts, approved, rep = _stats(veyr, author)
+
+    tx = veyr.submit_post(args=["  " + TOXIC_POST.upper() + "  "]).transact(**WAIT)
+    assert tx_execution_failed(tx)
+    assert _stats(veyr, author) == (posts, approved, rep)

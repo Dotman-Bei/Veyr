@@ -17,7 +17,7 @@ function Stat({ label, value, icon: Icon, tone }: { label: string; value: string
   );
 }
 
-/** Counts read from the contract (get_post_count / get_approved_count / get_reputation). */
+/** Counts read from the contract (get_stats / get_author). */
 export function StatsRow() {
   const { board, reputation } = useVeyr();
   const stats = board.stats;

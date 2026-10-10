@@ -44,6 +44,9 @@ describe('helpers', () => {
 
   it('maps malformed moderator output to a no-verdict message', () => {
     expect(contractErrorMessage('invalid decision from moderator')).toMatch(/no verdict was recorded/);
+    expect(contractErrorMessage('author suspended until 1791000000 (reputation too low)')).toMatch(/suspended/);
+    expect(contractErrorMessage('cooldown: wait 42s before posting again')).toMatch(/too fast/);
+    expect(contractErrorMessage('duplicate post: identical text was already submitted')).toMatch(/already submitted/);
     expect(contractErrorMessage('something else')).toBeNull();
   });
 });

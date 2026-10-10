@@ -1,5 +1,6 @@
 """Shared constants and helpers for the direct-mode contract tests."""
 
+import datetime
 import json
 
 CONTRACT = "contract/veyr.py"
@@ -24,3 +25,12 @@ def approve(category="approved", reason="On-topic and respectful."):
 
 def reject(category="toxic", reason="Contains insults."):
     return verdict("REJECT", category, reason)
+
+
+T0 = datetime.datetime(2026, 10, 10, 12, 0, 0, tzinfo=datetime.timezone.utc)
+
+
+def at(direct_vm, seconds: int) -> None:
+    """Set the transaction clock to T0 + seconds (the contract reads time via datetime.now)."""
+    when = T0 + datetime.timedelta(seconds=seconds)
+    direct_vm.warp(when.isoformat().replace("+00:00", "Z"))

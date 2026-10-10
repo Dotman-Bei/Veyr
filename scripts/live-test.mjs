@@ -93,7 +93,15 @@ async function main() {
   console.log('approved before :', initial.approved);
   console.log('reputation before:', initial.reputation, '\n');
 
+  let lastAcceptedAt = 0;
   for (const sample of SAMPLES) {
+    // The contract allows one post per author per cooldown; wait it out rather than be refused.
+    const { cooldown_seconds: cooldown } = await read(client, address, 'get_limits').then((l) => Object.fromEntries(l instanceof Map ? l : Object.entries(l)));
+    const waitMs = lastAcceptedAt + (Number(cooldown) + 5) * 1000 - Date.now();
+    if (waitMs > 0) {
+      console.log(`  (cooldown: waiting ${Math.ceil(waitMs / 1000)}s)`);
+      await sleep(waitMs);
+    }
     console.log(`▶ ${sample.label} (expect ${sample.expect})`);
     console.log(`  "${sample.text.slice(0, 72)}…"`);
     const before = await stats(client, address, account.address);
@@ -115,6 +123,7 @@ async function main() {
       continue;
     }
     console.log('  transaction status:', tx.statusName);
+    lastAcceptedAt = Date.now();
 
     await sleep(1000);
     const newest = (await read(client, address, 'get_posts'))[0];
@@ -134,6 +143,8 @@ async function main() {
     check(after.posts === before.posts + 1, 'post count +1');
     check(after.approved === before.approved + (approved ? 1 : 0), `approved count ${approved ? '+1' : 'unchanged'}`);
     check(after.reputation === before.reputation + (approved ? 1 : -1), `reputation ${approved ? '+1' : '-1'}`);
+    const feedTop = (await read(client, address, 'get_feed_page', [0, 1]))[0];
+    check(approved ? feedTop?.text === sample.text : feedTop?.text !== sample.text, `public feed ${approved ? 'shows' : 'hides'} it`);
     console.log();
   }
 

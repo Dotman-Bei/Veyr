@@ -29,7 +29,12 @@ def test_json_inside_markdown_fence_is_parsed(direct_vm, direct_deploy, direct_a
     direct_vm.sender = direct_alice
     fenced = "```json\n" + reject(category="spam", reason="Pure advertising.") + "\n```"
     result = _submit_with(direct_vm, c, fenced)
-    assert result == {"index": 0, "approved": False, "category": "spam", "reason": "Pure advertising."}
+    assert {k: result[k] for k in ("index", "approved", "category", "reason")} == {
+        "index": 0,
+        "approved": False,
+        "category": "spam",
+        "reason": "Pure advertising.",
+    }
 
 
 def test_json_with_surrounding_prose_is_parsed(direct_vm, direct_deploy, direct_alice):

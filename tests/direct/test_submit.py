@@ -1,6 +1,6 @@
 """Direct-mode tests for submit_post: validation, persistence and reputation."""
 
-from helpers import CONTRACT, TOPIC, addr, approve, reject
+from helpers import CONTRACT, TOPIC, addr, approve, at, reject
 
 MODERATOR = r".*content moderator.*"
 
@@ -41,6 +41,8 @@ def test_approved_post_is_persisted(direct_vm, direct_deploy, direct_alice):
         "approved": True,
         "category": "approved",
         "reason": "On-topic GenLayer discussion.",
+        "reputation": 1,
+        "suspended_until": 0,
     }
 
     assert c.get_post(0) == {
@@ -79,11 +81,14 @@ def test_reputation_accumulates_per_author(direct_vm, direct_deploy, direct_alic
 
     direct_vm.sender = direct_alice
     direct_vm.mock_llm(MODERATOR, approve())
+    at(direct_vm, 0)
     c.submit_post("First post about smart contracts")
+    at(direct_vm, 60)
     c.submit_post("Second post about validators")
 
     direct_vm.clear_mocks()
     direct_vm.mock_llm(MODERATOR, reject(category="spam", reason="Advertising."))
+    at(direct_vm, 120)
     c.submit_post("BUY CHEAP FOLLOWERS NOW visit my link")
 
     direct_vm.sender = direct_bob
@@ -100,8 +105,11 @@ def test_posts_are_returned_newest_first(direct_vm, direct_deploy, direct_alice)
     direct_vm.sender = direct_alice
     direct_vm.mock_llm(MODERATOR, approve())
 
+    at(direct_vm, 0)
     c.submit_post("oldest post")
+    at(direct_vm, 60)
     c.submit_post("middle post")
+    at(direct_vm, 120)
     c.submit_post("newest post")
 
     posts = c.get_posts()

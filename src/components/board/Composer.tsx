@@ -1,11 +1,11 @@
-import { useId, useState } from 'react';
-import { AlertCircle, AlertTriangle, ExternalLink, KeyRound, Loader2, Send, Wallet } from 'lucide-react';
+import { useEffect, useId, useState } from 'react';
+import { AlertCircle, AlertTriangle, Ban, Clock, ExternalLink, KeyRound, Loader2, Send, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { txUrl } from '@/lib/config';
-import { MAX_POST_CHARS, type Post } from '@/lib/genlayer';
+import { COOLDOWN_SECONDS, MAX_POST_CHARS, type Post } from '@/lib/genlayer';
 import { cn, shortAddress } from '@/lib/utils';
 import { useVeyr } from '@/state/VeyrContext';
 import { useSubmission } from '@/state/useSubmission';
@@ -13,6 +13,24 @@ import { ConsensusProgress } from './ConsensusProgress';
 import { VerdictResult } from './VerdictResult';
 
 const RULES = ['Not toxic', 'No sexual or graphic violence', 'On-topic for the board', 'Not spam or ads'];
+
+/** Wall-clock seconds, ticking once a second while `active`. */
+function useNowSeconds(active: boolean) {
+  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
+  useEffect(() => {
+    if (!active) return;
+    const timer = window.setInterval(() => setNow(Math.floor(Date.now() / 1000)), 1000);
+    return () => window.clearInterval(timer);
+  }, [active]);
+  return now;
+}
+
+function formatWait(seconds: number) {
+  if (seconds < 60) return `${seconds}s`;
+  const h = Math.floor(seconds / 3600);
+  const m = Math.ceil((seconds % 3600) / 60);
+  return h ? `${h}h ${m}m` : `${m}m`;
+}
 
 export function Composer({ onSettled }: { onSettled: (post: Post) => void }) {
   const { config, contract, wallet, board, reputation } = useVeyr();
@@ -35,9 +53,16 @@ export function Composer({ onSettled }: { onSettled: (post: Post) => void }) {
     },
   });
 
+  // The contract enforces these; showing them here saves a wasted signature.
+  const standing = reputation.standing;
+  const now = useNowSeconds(Boolean(standing && (standing.suspendedUntil || standing.lastPostAt)));
+  const suspendedFor = standing ? Math.max(0, standing.suspendedUntil - now) : 0;
+  const cooldownFor = standing?.lastPostAt ? Math.max(0, standing.lastPostAt + COOLDOWN_SECONDS - now) : 0;
+  const blocked = suspendedFor > 0 || cooldownFor > 0;
+
   const length = text.trim().length;
   const over = length > MAX_POST_CHARS;
-  const canSubmit = Boolean(wallet.signer) && !wallet.wrongNetwork && length > 0 && !over && !busy;
+  const canSubmit = Boolean(wallet.signer) && !wallet.wrongNetwork && length > 0 && !over && !busy && !blocked;
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +93,15 @@ export function Composer({ onSettled }: { onSettled: (post: Post) => void }) {
     action = (
       <Button type="submit" disabled={!canSubmit}>
         {busy ? <Loader2 className="animate-spin" aria-hidden /> : <Send aria-hidden />}
-        {state.phase === 'signing' ? 'Confirm in wallet…' : state.phase === 'pending' ? 'Moderating…' : 'Submit for moderation'}
+        {state.phase === 'signing'
+          ? 'Confirm in wallet…'
+          : state.phase === 'pending'
+            ? 'Moderating…'
+            : suspendedFor > 0
+              ? 'Suspended'
+              : cooldownFor > 0
+                ? `Wait ${formatWait(cooldownFor)}`
+                : 'Submit for moderation'}
       </Button>
     );
   }
@@ -119,6 +152,21 @@ export function Composer({ onSettled }: { onSettled: (post: Post) => void }) {
             {length}/{MAX_POST_CHARS}
           </span>
         </div>
+
+        {wallet.signer && suspendedFor > 0 && (
+          <div role="status" className="mt-4 flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-xs">
+            <Ban className="mt-0.5 size-3.5 shrink-0 text-destructive" aria-hidden />
+            <span>
+              Suspended for {formatWait(suspendedFor)}: three net rejections (reputation {standing?.reputation}) pause posting for 24 hours, and
+              each further rejection suspends you again. Approved posts rebuild your reputation.
+            </span>
+          </div>
+        )}
+        {wallet.signer && !suspendedFor && cooldownFor > 0 && !busy && state.phase !== 'settled' && (
+          <p role="status" className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Clock className="size-3.5" aria-hidden /> One post per minute per author. Duplicate text is refused before moderation.
+          </p>
+        )}
 
         <div className="mt-4 flex flex-wrap items-center gap-3">{action}</div>
       </form>

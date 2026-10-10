@@ -1,21 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { VeyrContract } from '@/lib/genlayer';
+import type { AuthorStanding, VeyrContract } from '@/lib/genlayer';
 
-/** On-chain reputation for one address; re-read whenever `version` changes. */
+/** On-chain standing (reputation, suspension, cooldown) for one address; re-read whenever `version` changes. */
 export function useReputation(contract: VeyrContract, address: `0x${string}` | null, version: unknown) {
-  const [reputation, setReputation] = useState<number | null>(null);
+  const [standing, setStanding] = useState<AuthorStanding | null>(null);
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
     if (!address) {
-      setReputation(null);
+      setStanding(null);
       return;
     }
     setLoading(true);
     try {
-      setReputation(await contract.readReputation(address));
+      setStanding(await contract.readAuthor(address));
     } catch {
-      setReputation(null);
+      setStanding(null);
     } finally {
       setLoading(false);
     }
@@ -25,5 +25,5 @@ export function useReputation(contract: VeyrContract, address: `0x${string}` | n
     load();
   }, [load, version]);
 
-  return { reputation, loading, reload: load };
+  return { reputation: standing?.reputation ?? null, standing, loading, reload: load };
 }

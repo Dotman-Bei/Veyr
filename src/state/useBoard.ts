@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toVeyrError, type VeyrError } from '@/lib/errors';
-import type { BoardStats, Post, VeyrContract } from '@/lib/genlayer';
+import { PAGE_MAX, type BoardStats, type Post, type VeyrContract } from '@/lib/genlayer';
 import { browserStorage, loadSnapshot, saveSnapshot, snapshotKey } from '@/lib/snapshot';
 
 export interface BoardState {
@@ -13,8 +13,20 @@ export interface BoardState {
   updatedAt: number | null;
   /** True while showing the last-visit snapshot, before the first fresh chain read completes. */
   fromSnapshot: boolean;
-  /** Re-read posts and stats from chain; resolves with the fresh newest-first posts. */
+  /** True when older posts exist on chain beyond those loaded. */
+  hasMore: boolean;
+  loadingMore: boolean;
+  /** Read the next page of older posts (bounded by the contract's page cap). */
+  loadMore: () => Promise<void>;
+  /** Re-read the newest page and stats from chain; resolves with the fresh newest-first posts. */
   refresh: () => Promise<Post[]>;
+}
+
+/** Newest page first, then any older posts already loaded that it does not cover. */
+function mergeNewest(fresh: Post[], previous: Post[]): Post[] {
+  if (fresh.length < PAGE_MAX) return fresh; // the page reached the oldest post
+  const oldest = fresh[fresh.length - 1].index;
+  return [...fresh, ...previous.filter((p) => p.index < oldest)];
 }
 
 const AUTO_REFRESH_MS = 60_000;
@@ -35,6 +47,11 @@ export function useBoard(contract: VeyrContract): BoardState {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<VeyrError | null>(null);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const postsRef = useRef<Post[]>(posts);
+  useEffect(() => {
+    postsRef.current = posts;
+  }, [posts]);
   const inFlight = useRef<Promise<Post[]> | null>(null);
   // The topic is re-read once per visit, even when a snapshot provided one.
   const topicRef = useRef<string | null>(null);
@@ -49,7 +66,7 @@ export function useBoard(contract: VeyrContract): BoardState {
           topicRef.current = await contract.readTopic();
           setTopic(topicRef.current);
         }
-        const nextPosts = await contract.readPosts();
+        const nextPosts = mergeNewest(await contract.readPostsPage(0), postsRef.current);
         setPosts(nextPosts);
         setLoading(false);
         const nextStats = await contract.readStats();
@@ -78,6 +95,23 @@ export function useBoard(contract: VeyrContract): BoardState {
     refresh().catch(() => {});
   }, [refresh]);
 
+  const hasMore = Boolean(stats && posts.length < stats.total);
+  const loadMore = useCallback(async () => {
+    if (loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const older = await contract.readPostsPage(postsRef.current.length);
+      setPosts((current) => {
+        const seen = new Set(current.map((p) => p.index));
+        return [...current, ...older.filter((p) => !seen.has(p.index))];
+      });
+    } catch (err) {
+      setError(toVeyrError(err));
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [contract, loadingMore]);
+
   // Gentle background refresh while the tab is visible, plus on refocus.
   useEffect(() => {
     let last = Date.now();
@@ -94,5 +128,5 @@ export function useBoard(contract: VeyrContract): BoardState {
     };
   }, [refresh]);
 
-  return { topic, posts, stats, loading, refreshing, error, updatedAt, fromSnapshot, refresh };
+  return { topic, posts, stats, loading, refreshing, error, updatedAt, fromSnapshot, hasMore, loadingMore, loadMore, refresh };
 }

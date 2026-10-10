@@ -5,10 +5,12 @@ import { useVeyr } from '@/state/VeyrContext';
 import { PostCard } from './PostCard';
 
 type Filter = 'all' | 'approved' | 'rejected';
+// The public feed is approved posts only. Rejected posts are never shown by default;
+// they stay on-chain, with their reason, behind the audit filters.
 const FILTERS: Array<{ id: Filter; label: string }> = [
-  { id: 'all', label: 'All' },
   { id: 'approved', label: 'Approved' },
   { id: 'rejected', label: 'Rejected' },
+  { id: 'all', label: 'All' },
 ];
 const PAGE = 10;
 
@@ -25,10 +27,10 @@ function PostSkeleton() {
   );
 }
 
-/** Newest-first on-chain feed with verdict filters. */
+/** Newest-first on-chain feed: approved by default, rejected kept for audit. */
 export function Feed({ highlightIndex }: { highlightIndex?: number }) {
   const { board } = useVeyr();
-  const [filter, setFilter] = useState<Filter>('all');
+  const [filter, setFilter] = useState<Filter>('approved');
   const [limit, setLimit] = useState(PAGE);
 
   const visible = useMemo(() => {
@@ -74,6 +76,7 @@ export function Feed({ highlightIndex }: { highlightIndex?: number }) {
             : updated
               ? `Read from chain at ${updated}`
               : ' '}
+        {filter !== 'approved' && ' · Audit view: rejected posts are hidden from the public feed and kept here with their reason.'}
       </p>
 
       {board.error && (
@@ -109,12 +112,21 @@ export function Feed({ highlightIndex }: { highlightIndex?: number }) {
         )}
       </div>
 
-      {visible.length > limit && (
+      {visible.length > limit ? (
         <div className="mt-6 flex justify-center">
           <Button variant="outline" onClick={() => setLimit((l) => l + PAGE)}>
             Show {Math.min(PAGE, visible.length - limit)} more
           </Button>
         </div>
+      ) : (
+        board.hasMore && (
+          <div className="mt-6 flex justify-center">
+            <Button variant="outline" onClick={() => board.loadMore()} disabled={board.loadingMore}>
+              {board.loadingMore && <Loader2 className="animate-spin" aria-hidden />}
+              Load older posts
+            </Button>
+          </div>
+        )
       )}
       {board.refreshing && board.posts.length > 0 && (
         <Loader2 className="mx-auto mt-4 size-4 animate-spin text-muted-foreground" aria-hidden />

@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import type { AppConfig } from '@/lib/config';
-import { VeyrContract } from '@/lib/genlayer';
+import { VeyrContract, type AuthorStanding } from '@/lib/genlayer';
 import { shortAddress } from '@/lib/utils';
 import { useBoard, type BoardState } from './useBoard';
 import { useReputation } from './useReputation';
@@ -12,7 +12,7 @@ interface VeyrContextValue {
   contract: VeyrContract;
   wallet: WalletState;
   board: BoardState;
-  reputation: { value: number | null; loading: boolean; reload: () => Promise<void> };
+  reputation: { value: number | null; standing: AuthorStanding | null; loading: boolean; reload: () => Promise<void> };
 }
 
 const VeyrContext = createContext<VeyrContextValue | null>(null);
@@ -35,9 +35,9 @@ export function VeyrProvider({ config, children }: { config: AppConfig; children
       contract,
       wallet,
       board,
-      reputation: { value: rep.reputation, loading: rep.loading, reload: rep.reload },
+      reputation: { value: rep.reputation, standing: rep.standing, loading: rep.loading, reload: rep.reload },
     }),
-    [config, contract, wallet, board, rep.reputation, rep.loading, rep.reload],
+    [config, contract, wallet, board, rep.reputation, rep.standing, rep.loading, rep.reload],
   );
 
   return <VeyrContext.Provider value={value}>{children}</VeyrContext.Provider>;

@@ -8,13 +8,26 @@ verdict, the post itself and the author's reputation are persisted on-chain.
 
 Public interface:
   views  get_topic, get_post_count, get_approved_count, get_reputation,
-         get_post, get_posts
+         get_post, get_posts, get_posts_page, get_feed_page, get_stats,
+         get_author, get_limits
   write  submit_post
+
+Enforcement, abuse and scale (all deterministic, checked BEFORE the paid LLM
+consensus step, so refused submissions cost validators nothing):
+  - verdicts have consequences: the public feed serves approved posts only;
+    an author whose reputation falls to SUSPEND_AT (-3) is suspended for
+    SUSPENSION_SECONDS, and every further rejection extends it;
+  - abuse: one submission per author per COOLDOWN_SECONDS, and an exact
+    duplicate (normalised text) of any earlier submission is refused;
+  - scale: every read is paginated with a hard PAGE_MAX, and the feed walks an
+    index of approved posts, so read cost is bounded by the page, not the board.
 """
 
 from genlayer import *
 
 from dataclasses import dataclass
+import datetime
+import hashlib
 import json
 import re
 import typing
@@ -22,6 +35,13 @@ import typing
 
 MAX_POST_CHARS = 2000
 MAX_REASON_CHARS = 280
+
+# Enforcement and abuse limits
+SUSPEND_AT = -3  # reputation at or below this suspends the author
+SUSPENSION_SECONDS = 24 * 60 * 60
+COOLDOWN_SECONDS = 60
+# Scale: no read returns more than this many records
+PAGE_MAX = 50
 
 APPROVE = "APPROVE"
 REJECT = "REJECT"
@@ -195,6 +215,26 @@ def _as_public_record(index: int, post: Post) -> dict:
     }
 
 
+def _now() -> int:
+    """Transaction time in epoch seconds (the same for every validator)."""
+    # GenVM pins datetime.now() to the transaction's timestamp, so this is deterministic.
+    return int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+
+
+def _fingerprint(text: str) -> str:
+    """Duplicate key: case-folded, whitespace-collapsed text, hashed (bounded storage)."""
+    normal = " ".join(text.casefold().split())
+    return hashlib.sha256(normal.encode("utf-8")).hexdigest()
+
+
+def _page_bounds(offset: int, limit: int) -> tuple:
+    if offset < 0:
+        raise gl.vm.UserError("offset must be >= 0")
+    if limit < 1 or limit > PAGE_MAX:
+        raise gl.vm.UserError(f"limit must be between 1 and {PAGE_MAX}")
+    return offset, limit
+
+
 def _parse_address(value: typing.Any) -> Address:
     try:
         return Address(value)
@@ -208,6 +248,10 @@ class Veyr(gl.Contract):
     posts: DynArray[Post]
     approved_count: u256
     reputation: TreeMap[Address, i32]
+    approved_ids: DynArray[u256]  # indices of approved posts, oldest first: the public feed
+    fingerprints: TreeMap[str, u256]  # normalised-text hash -> 1 + index of the first submission
+    last_post_at: TreeMap[Address, u256]  # epoch seconds of the author's last accepted submission
+    suspended_until: TreeMap[Address, u256]  # epoch seconds; 0 / missing = not suspended
 
     def __init__(self, topic: str):
         topic = topic.strip()
@@ -243,12 +287,59 @@ class Veyr(gl.Contract):
 
     @gl.public.view
     def get_posts(self) -> list:
+        """The newest PAGE_MAX posts, approved and rejected (bounded; use get_posts_page to go further)."""
+        return self.get_posts_page(0, PAGE_MAX)
+
+    @gl.public.view
+    def get_posts_page(self, offset: int, limit: int) -> list:
+        """Every post, newest first, for audit: rejected posts stay inspectable with their reason."""
+        offset, limit = _page_bounds(offset, limit)
         records: list = []
-        index = len(self.posts) - 1
-        while index >= 0:
+        index = len(self.posts) - 1 - offset
+        while index >= 0 and len(records) < limit:
             records.append(_as_public_record(index, self.posts[index]))
             index -= 1
         return records
+
+    @gl.public.view
+    def get_feed_page(self, offset: int, limit: int) -> list:
+        """The public board: approved posts only, newest first. O(limit) via the approved index."""
+        offset, limit = _page_bounds(offset, limit)
+        records: list = []
+        pos = len(self.approved_ids) - 1 - offset
+        while pos >= 0 and len(records) < limit:
+            index = int(self.approved_ids[pos])
+            records.append(_as_public_record(index, self.posts[index]))
+            pos -= 1
+        return records
+
+    @gl.public.view
+    def get_stats(self) -> dict:
+        """Board counts in one call."""
+        total = len(self.posts)
+        approved = int(self.approved_count)
+        return {"total": total, "approved": approved, "rejected": total - approved}
+
+    @gl.public.view
+    def get_author(self, author: str) -> dict:
+        """An author's standing: reputation, suspension and cooldown (epoch seconds)."""
+        who = _parse_address(author)
+        return {
+            "reputation": int(self.reputation.get(who, i32(0))),
+            "suspended_until": int(self.suspended_until.get(who, u256(0))),
+            "last_post_at": int(self.last_post_at.get(who, u256(0))),
+        }
+
+    @gl.public.view
+    def get_limits(self) -> dict:
+        """The enforcement constants, so clients never hard-code them."""
+        return {
+            "max_post_chars": MAX_POST_CHARS,
+            "suspend_at": SUSPEND_AT,
+            "suspension_seconds": SUSPENSION_SECONDS,
+            "cooldown_seconds": COOLDOWN_SECONDS,
+            "page_max": PAGE_MAX,
+        }
 
     # ------------------------------ writes ------------------------------
 
@@ -261,6 +352,19 @@ class Veyr(gl.Contract):
             raise gl.vm.UserError(f"post text too long (max {MAX_POST_CHARS} chars)")
 
         author = gl.message.sender_address
+        now = _now()
+
+        # Deterministic gates first: refused submissions never reach the paid LLM step.
+        until = int(self.suspended_until.get(author, u256(0)))
+        if now < until:
+            raise gl.vm.UserError(f"author suspended until {until} (reputation too low)")
+        last = int(self.last_post_at.get(author, u256(0)))
+        if last and now - last < COOLDOWN_SECONDS:
+            raise gl.vm.UserError(f"cooldown: wait {COOLDOWN_SECONDS - (now - last)}s before posting again")
+        key = _fingerprint(submission)
+        if key in self.fingerprints:
+            raise gl.vm.UserError("duplicate post: identical text was already submitted")
+
         verdict = _moderate_with_consensus(self.topic, submission)
         approved = verdict["decision"] == APPROVE
 
@@ -275,16 +379,29 @@ class Veyr(gl.Contract):
             )
         )
 
+        index = len(self.posts) - 1
+        self.fingerprints[key] = u256(index + 1)
+        self.last_post_at[author] = u256(now)
+
         score = int(self.reputation.get(author, i32(0)))
+        suspended = 0
         if approved:
-            self.reputation[author] = i32(score + 1)
+            score += 1
             self.approved_count = u256(int(self.approved_count) + 1)
+            self.approved_ids.append(u256(index))
         else:
-            self.reputation[author] = i32(score - 1)
+            score -= 1
+            if score <= SUSPEND_AT:
+                # the verdict has a consequence: a run of rejections suspends the author
+                suspended = now + SUSPENSION_SECONDS
+                self.suspended_until[author] = u256(suspended)
+        self.reputation[author] = i32(score)
 
         return {
-            "index": len(self.posts) - 1,
+            "index": index,
             "approved": approved,
             "category": verdict["category"],
             "reason": verdict["reason"],
+            "reputation": score,
+            "suspended_until": suspended,
         }

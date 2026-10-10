@@ -10,6 +10,8 @@ import { withRetry } from './retry';
 import type { Eip1193Provider } from './wallet';
 
 export const MAX_POST_CHARS = 2000;
+/** The contract's hard cap on records per read (get_limits().page_max). */
+export const PAGE_MAX = 50;
 
 export type Category = 'approved' | 'toxic' | 'off-topic' | 'spam' | 'other';
 
@@ -26,6 +28,16 @@ export interface BoardStats {
   total: number;
   approved: number;
 }
+
+/** An author's on-chain standing. Times are epoch seconds; 0 means none. */
+export interface AuthorStanding {
+  reputation: number;
+  suspendedUntil: number;
+  lastPostAt: number;
+}
+
+/** Mirrors the contract's constants (the contract enforces them; the UI only explains). */
+export const COOLDOWN_SECONDS = 60;
 
 type Sdk = typeof import('genlayer-js');
 type Chains = typeof import('genlayer-js/chains');
@@ -108,22 +120,26 @@ export class VeyrContract {
     return String(await this.read('get_topic'));
   }
 
-  /** Newest-first list of every post, approved or rejected. */
-  async readPosts(): Promise<Post[]> {
-    const raw = await this.read('get_posts');
+  /** One newest-first page of every post, approved or rejected (bounded by PAGE_MAX). */
+  async readPostsPage(offset = 0, limit = PAGE_MAX): Promise<Post[]> {
+    const raw = await this.read('get_posts_page', [offset, Math.min(limit, PAGE_MAX)]);
     if (!Array.isArray(raw)) throw new VeyrError('unknown', 'The contract returned an unexpected post list.');
     return raw.map(parsePost);
   }
 
-  /** Sequential (not parallel) so the public RPC is not hammered. */
+  /** Board counts in a single read. */
   async readStats(): Promise<BoardStats> {
-    const total = toNumber(await this.read('get_post_count'));
-    const approved = toNumber(await this.read('get_approved_count'));
-    return { total, approved };
+    const raw = await this.read('get_stats');
+    return { total: toNumber(field(raw, 'total')), approved: toNumber(field(raw, 'approved')) };
   }
 
-  async readReputation(author: `0x${string}`): Promise<number> {
-    return toNumber(await this.read('get_reputation', [author]));
+  async readAuthor(author: `0x${string}`): Promise<AuthorStanding> {
+    const raw = await this.read('get_author', [author]);
+    return {
+      reputation: toNumber(field(raw, 'reputation')),
+      suspendedUntil: toNumber(field(raw, 'suspended_until')),
+      lastPostAt: toNumber(field(raw, 'last_post_at')),
+    };
   }
 
   private async writer(signer: Signer): Promise<Client> {
